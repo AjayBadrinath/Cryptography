@@ -3,13 +3,15 @@
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+//YOUR CONVENTIONAL MOD FAILS IN NEGATIVE NUMBERS 
 #define MOD(a,b) (((a%b)+b)%b) 
-//32 -123 -->91
+//Other functions are self-explanatory ...
 char* GENERATE_CHAR_SET(){
 	char*alphabets=(char*)malloc(91*sizeof(char));
 	for(int i=32;i<123;i++){sprintf((alphabets+(i-32)),"%c",i);}
 	return alphabets;
 }
+
 int find_char(char*char_set,char val){
 	for(int i=0;i<strlen(char_set);i++){
 		if(*(char_set+i)==val){
