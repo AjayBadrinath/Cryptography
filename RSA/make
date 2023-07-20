@@ -1,0 +1,1 @@
+gcc RSA_new.c -lgmp -lm
