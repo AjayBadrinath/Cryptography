@@ -43,7 +43,7 @@ public class RSAencryption {
 			e.printStackTrace();
 		}
 	}
-	/*Encryption Functions based off private key*/
+	/*Encryption Functions based off private key YES IT CAN BE DONE!!!! BUT INSECURE THOUGH!*/
 	public static byte[] encrypt(String val)  {
 		try {
 		Cipher encrypt=Cipher.getInstance("RSA");
