@@ -66,7 +66,7 @@ public class RSAencryption {
 		}
 		
 	}
-	/*Decrypt using Public Key */
+	/*Decrypt using Public Key  same goes here check : https://crypto.stackexchange.com/questions/2123/rsa-encryption-with-private-key-and-decryption-with-a-public-key*/
 	public static String decrypt(String Encryptedval) {
 		try {
 		Cipher c=Cipher.getInstance("RSA");
