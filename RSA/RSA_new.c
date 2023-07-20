@@ -254,7 +254,10 @@ void TEXT_DECRYPT(unsigned long int * crypt,int length,rsa*r){
 	*(arr+i)='\0';
 	printf("%s",arr);
 }
-
+/*
+WARNING : Until next commit.... DO NOT USE THIS FUNCTION TO Encrypt file as Encryption Works but There seems to be some issue with decryption though all {Pubkey<privkey>} are backed by a binary file .There is incoherency while reading the byte format of the encrypted format.
+Other functions work as intended!
+*/
 void EncryptFile(char* path,rsa* r){
 	FILE * RSA_parameters=fopen("RSAKEY.bin","wb");
 	FILE * file=fopen(path,"r");
