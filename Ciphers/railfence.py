@@ -35,7 +35,7 @@ def railfence(st,key):
     return s1
 x1=railfence("wearediscoveredrunatonce",4)
 i=0
-#crappy bruteforcing
+#crappy bruteforcing you just need any cipher text to bruteforce 
 while x1!="wearediscoveredrunatonce":
     x1=railfence(x1,4)
     print(x1)
