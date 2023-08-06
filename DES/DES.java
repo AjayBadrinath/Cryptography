@@ -1,7 +1,10 @@
 package testss;
 
 import java.util.Random;
-
+/*
+ * Self  to implement Key Generation and Decryption of DES 
+ * 
+ * */
 class KeyGen{
 	String Key="";
 	 void generateKey() {
@@ -11,8 +14,100 @@ class KeyGen{
 		}
 		System.out.println(Key);
 	}
+	 int [][]PC1={
+		 {57,	49,	41,	33	,25,	17,	9},
+		 {1	,58	,50,	42,	34	,26	,18},
+		 {10	,2	,59	,51,	43,	35	,27},
+		 {19	,11,	3	,60,	52,	44,	36},
+		 {63	,55,	47,	39	,31	,23,	15},
+		 {7	,62	,54,	46	,38	,30	,22},
+		 {14,	6	,61	,53,	45	,37	,29},
+		 {21,	13,	5	,28	,20,	12,	4}
+	 };
+	 int [][]PC2= {
+			 {14,	17,	11,	24,	1,	5},
+			 {3	,	28,	15,	6,	21,	10},
+			 {23,	19,	12,	4,	26,	8},
+			 {16,	7,	27,	20,	13,	2},
+			 {41,	52,	31,	37,	47,	55},
+			 {30,	40,	51,	45,	33,	48},
+			 {44,	49,	39,	56,	34,	53},
+			 {46,	42,	50,	36,	29,	32}
+ 
+	 };
+	 int []ROT={1,	1,	2,	2,	2,	2,	2,	2,	1,	2,	2,	2,	2,	2,	2,	1};
 	 
-	 
+	 public  String PC2fn(String binseq) {
+			String op="";
+			StringBuilder d=new StringBuilder(binseq);
+			//System.out.println(d.length());
+			for (int i=0;i<8;i++) {
+				
+				for(int j=0;j<6;j++) {
+					
+					op+=d.charAt(PC2[i][j]-1);
+					
+				}
+				
+			}
+			return new String(op);
+		}
+
+	 public String SHL(String binseq,int n_shl) {
+		 //Split Key as 28 bit;
+		 String Ck=binseq.substring(0,28);
+		 String Dk=binseq.substring(28,56);
+		 return shift(Ck,n_shl)+shift(Dk,n_shl);
+		 
+	 }
+	 public String[] PermuteStoreKeys(String [] keys) {
+		 //48 bit Keys
+		 String [] PermKey=new String[17];
+		 for(int i=0;i<17;i++) {
+			 PermKey[i]=PC2fn(keys[i]);
+		 }
+		 return PermKey;
+	 }
+	 public String[] StoreKeys(String seed) {
+		 String cd0=seed;
+		 String [] key=new String[17];
+		 key[0]=cd0;
+		 
+		 for(int i=0;i<16;i++) {
+			 key[i+1]=SHL(key[i],-ROT[i]);
+		 }
+		 
+		 return key;
+		 
+	 }
+	 public  String shift(String seq,int n) {
+		 String shifted="";
+		 for (int i=0;i<seq.length();i++) {
+			 shifted+=seq.charAt((i-n)%seq.length());
+		 }
+		 return shifted;
+	 }
+	 public  String PC1fn(String binseq) {
+			//System.out.println(binseq);
+			char tmp;
+			int ctr=0;
+			String op="";
+			StringBuilder d=new StringBuilder(binseq);
+			//System.out.println(d.length());
+			for (int i=0;i<8;i++) {
+				
+				for(int j=0;j<7;j++) {
+					
+					op+=d.charAt(PC1[i][j]-1);
+					
+				}
+				
+				
+			}
+			
+			//System.out.println(op);
+			return new String(op);
+		}
 }
 public class DES {
 	/*P - BOX   in decimal format 
@@ -210,29 +305,33 @@ public class DES {
 			{0x18,	0x19,	0x1a,	0x1b,	0x1c,	0x1d},
 			{0x1c,	0x1d,	0x1e,	0x1f,	0x20,	0x1}
 	};
-	public static String ExpansionBoxMap(String binseq) {
-		System.out.println(binseq);
+	public  String ExpansionBoxMap(String binseq) {
+		//System.out.println(binseq);
 		char tmp;
 		int ctr=0;
 		String op="";
 		StringBuilder d=new StringBuilder(binseq);
-		System.out.println(d.length());
+		//System.out.println(d.length());
 		for (int i=0;i<8;i++) {
 			
 			for(int j=0;j<6;j++) {
+				//tmp=d.charAt(ctr);
+				//System.out.println(ctr);
 				
-				op+=d.charAt(ExpansionBox[i][j]-1);
-				
+				op+=d.charAt(ExpansionBox[i][j]-1) ; 
+				//d.setCharAt(ExpansionBox[i][j]-1, tmp);
+				//System.out.println(ExpansionBox[i][j]-1);
+				//ctr++;
 			}
 			
 			
 		}
 		
-		System.out.println(op);
-		return new String(op);
+		//System.out.println(op);
+		return op;
 	}
 	
-	static void PE() {
+	 void PE() {
 		for(int i=0;i<8;i++) {
 			System.out.print("{");
 			for(int j=0;j<6;j++) {
@@ -244,7 +343,7 @@ public class DES {
 	}
 	@Deprecated
 	
-	static void PB() {
+	 void PB() {
 		for(int j=0;j<8;j++) {
 			System.out.print("{");
 			for(int i=0;i<4;i++) {
@@ -255,7 +354,7 @@ public class DES {
 		}
 	}
 	@Deprecated
-	static void printSBOX() {
+	 void printSBOX() {
 		for (int i=0;i<8;i++) {
 			System.out.print("{");
 			for(int j=0;j<4;j++) {
@@ -276,7 +375,7 @@ public class DES {
 	 * 6 bit groupded 8 times or split whatever!
 	 * 
 	 * */
-	public static String MapToSBox(String binseq) {
+	public  String MapToSBox(String binseq) {
 		assert binseq.length()==48;
 		int ref;
 		String tmp="",tmp1="";
@@ -304,25 +403,24 @@ public class DES {
 			c="";
 			l+=6;
 		}
-		System.out.println(s1);
-		return "";
+		//System.out.println(s1);
+		return s1;
 	}
-	public static String convertTextToBinary(String plainText) {
+	public  String convertTextToBinary(String plainText) {
 		String binseq="";
 		for (int i=0;i<plainText.length();i++) {
-			//binseq+='0'+Integer.toBinaryString(plainText.charAt(i));
 			binseq+=String.format("%8s", Integer.toBinaryString(plainText.charAt(i))).replace(" ", "0");
 		}
 		return binseq;
 	}
 	/*64 bit sequence only */
-	public static String InitialPermutation(String binseq) {
-		System.out.println(binseq);
+	public  String InitialPermutation(String binseq) {
+		//System.out.println(binseq);
 		char tmp;
 		int ctr=0;
 		String op="";
 		StringBuilder d=new StringBuilder(binseq);
-		System.out.println(d.length());
+		//System.out.println(d.length());
 		for (int i=0;i<8;i++) {
 			
 			for(int j=0;j<8;j++) {
@@ -342,11 +440,11 @@ public class DES {
 			
 		}
 		
-		System.out.println(op);
+		//System.out.println(op);
 		return new String(op);
 	}
 	/*32 bit sequence */
-	public static String Xor(String s1,String s2) {
+	public  String Xor(String s1,String s2) {
 		String res="";
 		for(int i=0;i<s2.length();i++) {
 			if(s1.charAt(i)==s2.charAt(i)) {
@@ -358,52 +456,26 @@ public class DES {
 		}
 		return res;
 	}
-	public static String FinalPermutation(String binseq) {
-		//System.out.println(binseq);
+	public  String FinalPermutation(String binseq) {
+		
 		char tmp;
 		int ctr=0;
 		String op="";
 		StringBuilder d=new StringBuilder(binseq);
-		System.out.println(d.length());
+		//System.out.println(d.length());
 		for (int i=0;i<8;i++) {
 			//System.out.print("{");
 			for(int j=0;j<4;j++) {
-				/*
-				//d.se(ctr, ctr+1, d.charAt(initial_permutation_box[i][j]));
-				tmp=d.charAt(ctr);
-				char r=d.charAt(P_FINAL[i][j]-1);
-				d.setCharAt(ctr, r);
-				d.setCharAt(P_FINAL[i][j]-1,tmp );
-				ctr++;
-				*/
+				
 				op+=d.charAt(P_FINAL[i][j]-1);
-				//System.out.print("0x"+Integer.toHexString(initial_permutation_box[i][j])+",\t");
+				
 			}
 			
-			//System.out.println();
+			
 		}
-		System.out.println(op);
-		return new String(op);
+		
+		String out=new String(op);
+		return out;
 	}
-	
-public static void main(String[]args) {
-	/*
-	String bin=convertTextToBinary("hello world");
-	System.out.println(bin.length());
-	int s=0x3a;
-	//System.out.println(bin.substring(0, 65).length());
-	InitialPermutation(bin.substring(0, 64));
-	KeyGen k=new KeyGen();
-	k.generateKey();
-	System.out.println(k.Key.length());
-	//PB();
-	//MapToSBox("011010000110010101101100011011000110111101000000");
-	MapToSBox("100000110011100111011111001100000001010001011010");
-	FinalPermutation("01000110000010011011101011100000");
-	*/
-	System.out.println(0x3a-1);
-	//FinalPermutation("01000110000010011011101011100000");
-	//ExpansionBoxMap("00000000111111100000000010001101");
-	//System.out.println(Xor("10111111101010010011001010010111","11110001001100001000010011010001"));
-}
+
 }
