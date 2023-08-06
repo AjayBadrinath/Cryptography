@@ -3,17 +3,18 @@ package testss;
 import java.math.BigInteger;
 
 public class DESImpl {
+	
 	static int [][]IP_inv= {
-			{40,	8,	48,	16,	56,	24,	64,	32},
-			{39,	7,	47,	15,	55,	23,	63,	31},
-			{38,	6,	46,	14,	54,	22,	62,	30},
-			{37,	5,	45,	13,	53,	21,	61,	29},
-			{36,	4,	44,	12,	52,	20,	60,	28},
-			{35,	3,	43,	11,	51,	19,	59,	27},
-			{34,	2,	42,	10,	50,	18,	58,	26},
-			{33,	1,	41,	9,	49,	17,	57,	25}
-
+			{0x28,	0x8,	0x30,	0x10,	0x38,	0x18,	0x40,	0x20,	},
+			{0x27,	0x7,	0x2f,	0xf,	0x37,	0x17,	0x3f,	0x1f,	},
+			{0x26,	0x6,	0x2e,	0xe,	0x36,	0x16,	0x3e,	0x1e,	},
+			{0x25,	0x5,	0x2d,	0xd,	0x35,	0x15,	0x3d,	0x1d,	},
+			{0x24,	0x4,	0x2c,	0xc,	0x34,	0x14,	0x3c,	0x1c,	},
+			{0x23,	0x3,	0x2b,	0xb,	0x33,	0x13,	0x3b,	0x1b,	},
+			{0x22,	0x2,	0x2a,	0xa,	0x32,	0x12,	0x3a,	0x1a,	},
+			{0x21,	0x1,	0x29,	0x9,	0x31,	0x11,	0x39,	0x19,	}
 	};
+	 
 	public static String ipinvfn(String binseq) {
 		
 		
@@ -92,18 +93,56 @@ public class DESImpl {
 	
 	
 	public static void main(String[]args) {
+		
 		DES s1=new DES();
+		
 		String ToBeEncrypted="0000000100100011010001010110011110001001101010111100110111101111";
+		/*
+		String message="Hello World!!";
+		String bin=s1.convertTextToBinary(message);
+		
+		//String bin="0100";
+		if(bin.length()<64) {
+			bin=s1.PadZeros(bin);
+		}
+		else {
+			int i=0;
+			StringBuilder s2=new StringBuilder(bin);
+			//System.out.println(bin.length()-bin.length()%64);
+			String tmp=bin.substring(bin.length()-bin.length()%64,bin.length());
+			System.out.println(tmp);
+			s2.delete(bin.length()-bin.length()%64,bin.length());
+			
+			s2.append(s1.PadZeros(tmp));
+			//bin.replace(tmp, s1.PadZeros( bin.substring(bin.length()-bin.length()%64,bin.length())));
+			String rep=s2.toString();
+			System.out.println(bin.substring(64,104));
+			BigInteger x=new BigInteger(rep.substring(64, 128),2);
+			System.out.println(s1.PadZerosWithMultiple8(x.toString(2),bin.substring(64,104).length()-x.toString(2).length()));
+			
+			//for (int l=0;i<rep.length();l+=8) {
+			//	int k=Integer.parseInt((rep.substring(l,l+8)),2);
+			//	System.out.println((char)k);
+			//}
+			
+		}
+		
+		*/
+		
 		/*Example from https://simewu.com/des/*/
 		/*
-		 * Will soon document the code well and apply it to plain text 
+		 * Will soon document the code  and apply it to plain text 
+		 * 
 		 * this is just an Example
 		 * */
+		
 		String cipher=Encrypt(s1,ToBeEncrypted);
 		String decrypted=Decrypt(s1,cipher);
 		System.out.println("Message:"+ToBeEncrypted);
 		System.out.println("Cipher:\t"+cipher);
-		System.out.println("Plain Text /Original Message:\t"+decrypted);
+		System.out.println("Plain Text [Original Message] :\t"+decrypted);
+		
+		//System.out.println(Integer.parseInt("00001011",2));
 		//DESDecrypt(s1,"1011101010001000111101101001100101110011001101001010010000011111","000010100000001000000111100110110100000010100001");
 		//Decrypt(s1,"0101011011001100000010011110011111001111110111000100110011101111");
 		
@@ -111,4 +150,5 @@ public class DESImpl {
 		//System.out.println(s1.InitialPermutation("0101011011001100000010011110011111001111110111000100110011101111"));
 		//Encrypt(s1,("0000000100100011010001010110011110001001101010111100110111101111"));
 	}
+	
 }
