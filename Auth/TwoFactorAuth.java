@@ -1,4 +1,7 @@
-
+/*
+@author : AjayBadrinath
+@title : TwoFactorAuthentication 
+*/
 import java.security.SecureRandom;
 
 import org.apache.commons.codec.binary.Base32;
