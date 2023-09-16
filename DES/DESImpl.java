@@ -1,5 +1,8 @@
 package testss;
-
+/*
+@author : AjayBadrinath
+@title :DES Implementation
+*/
 import java.math.BigInteger;
 
 public class DESImpl {
