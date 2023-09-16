@@ -1,5 +1,8 @@
 package testss;
-
+/*
+@author : AjayBadrinath
+@title  :DES 
+*/
 import java.util.Random;
 /*
  * For Reference Tables...
