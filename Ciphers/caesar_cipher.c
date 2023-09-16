@@ -1,3 +1,7 @@
+/*
+Author - Ajay Badrinath
+Will document this soon....
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
