@@ -1,3 +1,9 @@
+'''
+
+Author : AjayBadrinath 
+will document this soon for future audit purposes 
+
+'''
 def railfence(st,key):
     l=2*key-2
     j=0
