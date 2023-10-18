@@ -1,4 +1,12 @@
 package testss;
+/*
+ * @author : Ajay Badrinath
+ * @date   : 16-10-23
+ * */
+/*
+ * Mersenne Class containing constants , generating function , seed , and twisting 
+ * 
+ * */
 class mersenne{
 	/*
 	 * Mersenne Constants
@@ -20,13 +28,23 @@ class mersenne{
 	 * */
 	int idx=N+1;
 	long seed;
-	
+	/*
+	 * MT - 1x624 dimensional state Array
+	 * Access generated number Exhaustively in the array
+	 * */
 	long []MT;
-	long mask=((1L<<32)-1);
+	long mask=((1L<<32)-1);	// MT Standard is for 32 bits only so performing k&mask -->32 bit long 
+	
+	/*
+	 * Constructor for initializing the state array with the seed.
+	 * */
 	mersenne(long seed){
 		this.seed=seed;
 		initArray(seed);
 	}
+	/*
+	 * The seed function seeds the MT array and fill up the entire array with seed generated from MT[i-1]  
+	 * */
 	public  void initArray(long seed) {
 		MT=new long[N];
 		MT[0]=seed&mask;
@@ -36,13 +54,17 @@ class mersenne{
 		
 		
 	}
+	/*
+	 * Function to generate Random Numbers from the initialized state array
+	 * */
 	long genRand() {
 		if(idx>=N) {
-			twist();
+			twist(); // If the index Exceed the generated state array then perform twist operation
 			idx=0;
 		}
 		/*
 		 * MT Standard Definition of Tempering Shifts.
+		 * Tempering shift done to reduce preimage attacks 
 		 * */
 		long y=MT[idx++];
 		y=(y^(y>>u))&mask;
@@ -64,6 +86,9 @@ class mersenne{
 		}
 	}
 	*/
+	/*
+	 * Function Twist to Ensure Huge period (2^some Mersenne prime-1)
+	 * */
 	void twist() {
 		long tmp,t1;
 		int j;
@@ -92,7 +117,9 @@ class mersenne{
 }
 public class mersenneTwister {
 	public static void main(String[]args) {
+		//initialise and set the seed as some instance of curr time -> Ensures non repetition
 	mersenne x=new mersenne(System.currentTimeMillis());
+	/*Typecast 32-bit long into int and bound by (abs,100) to generate random numbers from 1-100*/
 	for(int i=0;i<100;i++) {
 		//System.out.println(String.format("%8s",Long.toHexString(x.genRand())).replace(" ", "0"));
 		System.out.println(Math.abs((int)x.genRand()%100));
