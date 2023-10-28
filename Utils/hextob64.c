@@ -45,4 +45,4 @@ int main(){
 	hextob64("ef9af374",10);
 }
 
-þ
+
