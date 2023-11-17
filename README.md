@@ -15,6 +15,7 @@ Ciphers   |Caeser       |✔        |<img src="https://upload.wikimedia.org/wiki
  Hashing| MD5    |✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
  &nbsp; |SHA-256 |✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
  &nbsp; |SHA -3 Keccack|❌
+ Key Derivation Function | HMAC-PBKDF2|✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
  MFA - PoC | MFA- Java Version |✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="20" height="20" >
 PRNG | MT19937 | ✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
 
