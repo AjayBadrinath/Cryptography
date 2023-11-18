@@ -1,6 +1,6 @@
 /*
  * 
- * @title  :  							NIST FIPS-180.4 2015 Implementation of SHA 256 Algorithm  For Single Block Messages 
+ * @title  :  							NIST FIPS-180.4 2015 Implementation of SHA 256 Algorithm  For Multi Block Messages 
  * @author : Ajay Badrinath
  * @version:2.0    - Added Multi Block Support .....  Changed Revision 18-11-2023;
  * 
