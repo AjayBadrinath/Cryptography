@@ -5,26 +5,25 @@
  * @version:2.0    - Added Multi Block Support .....  Changed Revision 18-11-2023;
  * 
  * Version -> Comments 
- * 
+ * 				
  * 				1. Added support for Multi Block Messages .
  * 				2. Refactor code and make it more modular
  * 				3. Adaptible to other modules ..
  * 				4. Bug Fixes ..
+ * 				5. Added Txt hash support
+ * 				6. Removed Redundant code in sha256Schedule.PrePreparerSchedule -> Modified loop to handle ternary Expression indexing.
  * */
 package testss;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
+ 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+ 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.*;
+ 
 import java.math.BigInteger;
-import java.util.Base64;
-import java.util.stream.Collectors;
+ 
 /*
  * Class for Pre Processing 
  * 			-> Input Sanitization 
@@ -371,7 +370,6 @@ class sha256Schedule{
 	     * @param - HashSequence - initial sequence 
 	     * @return  - String of length 256 which is the SHA(message).
 	     * */
-	    
 	   
 	  String PrepareSchedule(String [][]HashSeq,int n_round) {
 		  /* This w hold 64 bit binsry sequence which will be used for each round */
@@ -381,52 +379,11 @@ class sha256Schedule{
 		  String a,b,c,d,e,f,g,h;
 		  int idx=0;
 		  long t1,t2;
-		  for (String i:Block[0]){w[idx++]=i;}
-		  for (int j=idx;j<64;j++) {
-				 // w[j]=Sigma1(w[j-2])+w[j-7]+Sigma0(w[j-15])+w[j-16];
-				  w[j]=String.format("%32s",(Long.toBinaryString( ((long)(((Long.parseLong(Sigma1(w[j-2]),2)&mask)+(Long.parseLong(w[j-7],2)&mask)+(Long.parseLong(Sigma0(w[j-15]),2)&mask)+(Long.parseLong(w[j-16],2)&mask))%Math.pow(2,32)))))).replace(" ", "0");
-			  }
 		  
-		  a=HashSeq[0][0];
-		  b=HashSeq[0][1];
-		  c=HashSeq[0][2];
-		  d=HashSeq[0][3];
-		  e=HashSeq[0][4];
-		  f=HashSeq[0][5];
-		  g=HashSeq[0][6];
-		  h=HashSeq[0][7];
-		  for (int t=0;t<64;t++) {
-			  //t1=h+SIGMA1(e)+Choose(e,f,g)+shaconstSeq[t]+w[t];
-			  
-			 // System.out.println(Long.toHexString(Long.parseLong(a,2)));
-			  t1=(long) ((((Long.parseLong(h,2)&mask)+(Long.parseLong(SIGMA1(e),2)&mask)+(Long.parseLong(Choose(e,f,g),2)&mask)+(Long.parseLong(shaconst[t],2)&mask)+(Long.parseLong(w[t],2)&mask)))%Math.pow(2, 32));
-			  //t2=SIGMA0(a)+Maj(a,b,c)
-			  t2=(long) (((Long.parseLong(SIGMA0(a),2)&mask)+(Long.parseLong(Majority(a,b,c),2)) )%Math.pow(2,32));
-			  h=g;
-			  g=f;
-			  f=e;
-			  //e=d+t1
-			  e=String.format("%32s",  Long.toBinaryString((long) ((((Long.parseLong(d, 2)&mask)+t1))%Math.pow(2, 32)))).replace(" ", "0");
-			  d=c;
-			  c=b;
-			  b=a;
-			  //a=t1+t2
-			  a= String.format("%32s", Long.toBinaryString((long) (((t1+t2))%Math.pow(2, 32)))).replace(" ", "0");
-		  }
-		  /*After intermediate computation of sha variables add variables to corresponding i-1th hash and set it as ith hash*/
-		HashSeq[0][0]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(a,2)+Long.parseLong(HashSeq[0][0],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[0][1]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(b,2)+Long.parseLong(HashSeq[0][1],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[0][2]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(c,2)+Long.parseLong(HashSeq[0][2],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[0][3]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(d,2)+Long.parseLong(HashSeq[0][3],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[0][4]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(e,2)+Long.parseLong(HashSeq[0][4],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[0][5]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(f,2)+Long.parseLong(HashSeq[0][5],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[0][6]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(g,2)+Long.parseLong(HashSeq[0][6],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[0][7]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(h,2)+Long.parseLong(HashSeq[0][7],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		/*Concatenate H0|H1|...|H7 and return Hash*/
-		  for (int n=1;n<n_round;n++) {
+		  for (int n=0;n<n_round;n++) {
 			  
 			  idx=0;
-		  for (String i:Block[n]){w[idx++]=i;}
+		  for (String i:Block[(n==0)?0:n]){w[idx++]=i;}
 		  /*then for 16<=w<=64*/
 		  //W(t)=Sigma1W(t-2)+W(t-7)+Sigma0W(t-15)+W(t-16)
 		  for (int j=idx;j<64;j++) {
@@ -439,14 +396,14 @@ class sha256Schedule{
 		  // For ith iteration we take i-1 th hash  
 		  /*In SHA 1 we manipulate only a,b,c,d,e,f,g,h to generate hash*/
 		  
-		  a=HashSeq[n-1][0];
-		  b=HashSeq[n-1][1];
-		  c=HashSeq[n-1][2];
-		  d=HashSeq[n-1][3];
-		  e=HashSeq[n-1][4];
-		  f=HashSeq[n-1][5];
-		  g=HashSeq[n-1][6];
-		  h=HashSeq[n-1][7];
+		  a=HashSeq[(n==0)?0:n-1][0];
+		  b=HashSeq[(n==0)?0:n-1][1];
+		  c=HashSeq[(n==0)?0:n-1][2];
+		  d=HashSeq[(n==0)?0:n-1][3];
+		  e=HashSeq[(n==0)?0:n-1][4];
+		  f=HashSeq[(n==0)?0:n-1][5];
+		  g=HashSeq[(n==0)?0:n-1][6];
+		  h=HashSeq[(n==0)?0:n-1][7];
 		  /*This loop compute intermediate hashes for ith block*/
 		  
 		  
@@ -469,14 +426,14 @@ class sha256Schedule{
 			  a= String.format("%32s", Long.toBinaryString((long) (((t1+t2))%Math.pow(2, 32)))).replace(" ", "0");
 		  }
 		  /*After intermediate computation of sha variables add variables to corresponding i-1th hash and set it as ith hash*/
-		HashSeq[n][0]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(a,2)+Long.parseLong(HashSeq[n-1][0],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[n][1]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(b,2)+Long.parseLong(HashSeq[n-1][1],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[n][2]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(c,2)+Long.parseLong(HashSeq[n-1][2],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[n][3]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(d,2)+Long.parseLong(HashSeq[n-1][3],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[n][4]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(e,2)+Long.parseLong(HashSeq[n-1][4],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[n][5]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(f,2)+Long.parseLong(HashSeq[n-1][5],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[n][6]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(g,2)+Long.parseLong(HashSeq[n-1][6],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
-		HashSeq[n][7]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(h,2)+Long.parseLong(HashSeq[n-1][7],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
+		HashSeq[(n==0)?0:n][0]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(a,2)+Long.parseLong(HashSeq[(n==0)?0:n-1][0],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
+		HashSeq[(n==0)?0:n][1]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(b,2)+Long.parseLong(HashSeq[(n==0)?0:n-1][1],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
+		HashSeq[(n==0)?0:n][2]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(c,2)+Long.parseLong(HashSeq[(n==0)?0:n-1][2],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
+		HashSeq[(n==0)?0:n][3]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(d,2)+Long.parseLong(HashSeq[(n==0)?0:n-1][3],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
+		HashSeq[(n==0)?0:n][4]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(e,2)+Long.parseLong(HashSeq[(n==0)?0:n-1][4],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
+		HashSeq[(n==0)?0:n][5]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(f,2)+Long.parseLong(HashSeq[(n==0)?0:n-1][5],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
+		HashSeq[(n==0)?0:n][6]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(g,2)+Long.parseLong(HashSeq[(n==0)?0:n-1][6],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
+		HashSeq[(n==0)?0:n][7]=String.format("%32s", Long.toBinaryString((long) (((Long.parseLong(h,2)+Long.parseLong(HashSeq[(n==0)?0:n-1][7],2))&mask)%Math.pow(2, 32)))).replace(" ", "0") ;
 		/*Concatenate H0|H1|...|H7 and return Hash*/
 		  }
 		String finalHash="";
@@ -542,7 +499,7 @@ public class sha256 {
 		
 		
 		String x1="a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?";
-		System.out.println("SHA-256 Hash: "+new SHA("jj").shaRoutine());
+		System.out.println("SHA-256 Hash: "+new SHA("ajay").shaRoutine());
 		
 		try {
 			SHA p=new SHA("");
