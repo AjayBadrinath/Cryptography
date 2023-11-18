@@ -493,6 +493,8 @@ class SHA{
 public class sha256 {
 	/*
 	 * Main function to test our implementation.
+  	*  .. Should be a separate unit test - >JUNIT . Test it  by the means of the below Example 
+   	* Simple Abstractions are provided below.
 	 * */
 	public static void main (String[]args) {
 		/*Create new Instance of shaRoutine */
