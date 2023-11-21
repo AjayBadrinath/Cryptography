@@ -1,6 +1,6 @@
 /*
  * 
- * @title  :  							NIST FIPS-180.4 2015 Implementation of SHA 256 Algorithm  For Single Block Messages 
+ * @title  :  							NIST FIPS-180.4 2015 Implementation of SHA 256 Algorithm  For Multi Block Messages 
  * @author : Ajay Badrinath
  * @version:2.0    - Added Multi Block Support .....  Changed Revision 18-11-2023;
  * 
@@ -493,6 +493,8 @@ class SHA{
 public class sha256 {
 	/*
 	 * Main function to test our implementation.
+  	*  .. Should be a separate unit test - >JUNIT . Test it  by the means of the below Example 
+   	* Simple Abstractions are provided below.
 	 * */
 	public static void main (String[]args) {
 		/*Create new Instance of shaRoutine */
