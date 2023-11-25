@@ -11,6 +11,7 @@ Ciphers   |Caeser       |✔        |<img src="https://upload.wikimedia.org/wiki
 &nbsp;	| RailFence |✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-python-1-226045.png?f=webp&w=256" width="40" height="40">
  &nbsp;	|Vignere   |✔|<img src="https://upload.wikimedia.org/wikipedia/commons/1/18/C_Programming_Language.svg" width="20" height="20">
  SKE    | DES 56  |✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
+ &nbsp;| GOST 28147-89 (Magma)|❌
  ASKE   | RSA     |✔|<img src="https://upload.wikimedia.org/wikipedia/commons/1/18/C_Programming_Language.svg" width="20" height="20">
  Hashing| MD5    |✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
  &nbsp; |SHA-256 |✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
