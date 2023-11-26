@@ -42,7 +42,7 @@ Further Improvements:
 
 
 // Helper Definitions 
-
+#define MIN 0
 #define PUBLIC_N(prime1,prime2)(prime1*prime2);
 #define POW(res,b,e,mod) (mpz_powm(res,b,e,mod));
 #define GEN_PRIME_RANGE(a,b) (rand()%(b-a+1))+a;
@@ -52,17 +52,17 @@ Further Improvements:
 /*===========================  UTILITY FUNCTIONS ===========================  */
 
 
-int PrimeCheck(int num){
+lli PrimeCheck(lli num){
 	if(num<2){return 0;}
-	for (int i=2;i<num/2+1;i++){
+	for (lli i=2;i<num/2+1;i++){
 		if(num%i==0){return 0;}
 	}
 	return 1;
 }
 
 
-int generatePrime(int start_Range, int EndRange){
-	int prime;
+lli generatePrime(lli start_Range, lli EndRange){
+	lli prime;
 	time_t t1;
 	srand((unsigned)time(&t1));
 	//prime=(rand()%(EndRange-start_Range+1))+start_Range;
@@ -79,23 +79,23 @@ int generatePrime(int start_Range, int EndRange){
 /*===========================  SENDER FUNCTIONS    ============================*/
 
 
-int Setup_sender(fsp_snd* sender,int n,int secretKey){
+lli Setup_sender(fsp_snd* sender,lli n,lli secretKey){
 
 	sender->secret=secretKey;
 	sender->n=n;
-	sender->PUBLIC_KEY=(int)pow(secretKey,2)%n;
+	sender->PUBLIC_KEY=(lli)pow(secretKey,2)%n;
 	return sender->PUBLIC_KEY;
 
 }
 
-int  commit_phase(fsp_snd*send){
+lli  commit_phase(fsp_snd*send){
 	send->rand=rand()%120;
-	send->x=(int)pow(send->rand,2)%send->n;
+	send->x=(lli)pow(send->rand,2)%send->n;
 	return send->x;
 }
 
-int respose_phase(fsp_snd*send,int challenge){
-	send->y=send->rand*(int)pow(send->secret,challenge)%send->n;
+lli respose_phase(fsp_snd*send,lli challenge){
+	send->y=(lli)abs(send->rand*(lli)pow(send->secret,challenge)%send->n);
 	return send->y;
 }
 
@@ -105,23 +105,23 @@ int respose_phase(fsp_snd*send,int challenge){
 /*==========================   RECIEVER FUNCTIONS   ==========================*/
 
 
-int Setup_reciever(fsp_recv*recv){
-	recv->prime1=generatePrime(100,10000);
-	recv->prime2=generatePrime(100,10000);
+lli Setup_reciever(fsp_recv*recv){
+	recv->prime1=generatePrime(MIN,INT_MAX%_TUNABLE);
+	recv->prime2=generatePrime(MIN,INT_MAX%_TUNABLE);
 	recv->n=PUBLIC_N(recv->prime2,recv->prime1);
 	return recv->n;
 
 }
 
-int challenge_phase(fsp_recv*recv,int PUBLIC_KEY){
-	recv->challenge=(int)rand()%100;
+lli challenge_phase(fsp_recv*recv,lli PUBLIC_KEY){
+	recv->challenge=(lli)rand()%(INT_MAX%_TUNABLE);
 	recv->PUBLIC_KEY=PUBLIC_KEY;
 	return recv->challenge;
 }
 
 
-bool verification_phase(fsp_recv*recv,int x,int y){
-	 (((int)pow(y,2)%recv->n)==(x*(int)pow(recv->PUBLIC_KEY,recv->challenge)%recv->n))?true:false;
+bool verification_phase(fsp_recv*recv,lli x,lli y){
+	 (((lli)pow(y,2)%recv->n)==(x*(lli)pow(recv->PUBLIC_KEY,recv->challenge)%recv->n))?true:false;
 
 }
 

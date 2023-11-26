@@ -22,13 +22,16 @@ VERSION: 1.0: Base Implementation - Modular.
 #include <math.h>
 #include <time.h>
 #include <stdbool.h>
+#include <limits.h>
 
+#define _TUNABLE 10000
+#define lli long long int 
 
 /*===========================  UTILITY FUNCTIONS ===========================  */
 
 
-int PrimeCheck(int);
-int generatePrime(int, int);
+lli PrimeCheck(lli);
+lli generatePrime(lli, lli);
 
 
 /*===========================  SENDER FUNCTIONS    ============================*/
@@ -36,32 +39,32 @@ int generatePrime(int, int);
 
 typedef struct FSP_snd{
 	
-	int n,rand,x,y;
-	int secret;
-	int PUBLIC_KEY;
+	lli n,rand,x,y;
+	lli secret;
+	lli PUBLIC_KEY;
 }fsp_snd;
 
-int Setup_sender(fsp_snd*,int,int);
+lli Setup_sender(fsp_snd*,lli,lli);
 
-int  commit_phase(fsp_snd*);
+lli  commit_phase(fsp_snd*);
 
-int respose_phase(fsp_snd*,int);
+lli respose_phase(fsp_snd*,lli);
 
 
 /*==========================   RECIEVER FUNCTIONS   ==========================*/
 
 
 typedef struct FSP_recv{
-	int prime2, prime1;
-	int n,challenge;
-	int PUBLIC_KEY;
+	lli prime2, prime1;
+	lli n,challenge;
+	lli PUBLIC_KEY;
 }fsp_recv;
 
-int Setup_reciever(fsp_recv*);
+lli Setup_reciever(fsp_recv*);
 
-int challenge_phase(fsp_recv*,int);
+lli challenge_phase(fsp_recv*,lli);
 
-bool verification_phase(fsp_recv*,int,int);
+bool verification_phase(fsp_recv*,lli,lli);
 
 
 #endif
