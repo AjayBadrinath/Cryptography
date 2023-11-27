@@ -4,8 +4,18 @@
 Author: AjayBadrinath
 Date:25-11-2023
 
-VERSION: 1.0: Base Implementation - Modular.
+VERSION: 1.1: Base Implementation - Modular && Added Comments for better readablity .
 
+
+*/
+
+
+/*
+
+Portablity : This  library can be ported to Python and can be used as is in  Vanilla C
+
+ For Testing Modify the test.c File and Run: make test
+ For Porting to python : Run  : make SharedLib and use the .so file as a starter..
 
 */
 
@@ -23,7 +33,11 @@ VERSION: 1.0: Base Implementation - Modular.
 #include <time.h>
 #include <stdbool.h>
 #include <limits.h>
-
+// Helper Definitions 
+#define MIN 0
+#define PUBLIC_N(prime1,prime2)(prime1*prime2);
+#define POW(res,b,e,mod) (mpz_powm(res,b,e,mod));
+#define GEN_PRIME_RANGE(a,b) (rand()%(b-a+1))+a;
 #define _TUNABLE 100
 #define lli long long int 
 

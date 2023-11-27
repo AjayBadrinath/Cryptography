@@ -4,7 +4,7 @@
 Author: AjayBadrinath
 Date:25-11-2023
 
-VERSION: 1.0: Base Implementation - Modular.
+VERSION: 1.1: Base Implementation - Modular.&& Added Comments to code
 
 Comments On the Implementation :
 		
@@ -34,7 +34,7 @@ Further Improvements:
 						1.Further improvements to use openssl for prime generation
 						2.use longer datatypes rather than int 
 						3. Need to add Public Key Infrastructure(PKI ) for Key Distribution . Otherwise this is useless.
-						4.Do Note that the sender public Key has to be registered.
+						4.Do Note that the sender public Key has to be registered.(Need to add Database Support )
 						
 
 */
@@ -43,16 +43,36 @@ Further Improvements:
 #include "FiatShamir.h"
 
 
-// Helper Definitions 
-#define MIN 0
-#define PUBLIC_N(prime1,prime2)(prime1*prime2);
-#define POW(res,b,e,mod) (mpz_powm(res,b,e,mod));
-#define GEN_PRIME_RANGE(a,b) (rand()%(b-a+1))+a;
+/*  
+
+Note: 
+
+
+1.The Macros are Defined  in the header file 
+And I have to change the Datatype to Arbitrary prescision to handle Huge Primes(Power especially ...).
+
+2.I have Downsized the Prime Generation Intentionally as LLI (Long Long Int ) still overflows and wraps around as -ve integer which breaks the system.
+So there will be some arbitrary places of numbers here and there repeated. 
+
+
+IMPORTANT:
+
+
+3.Do NOTE  that This was tested on a Linux System .. What may have compiled for me wouldn't for you if you would. So It is recommended to run the "Make Clean && Make SharedLib" commands
+
+4.Also This will not work on windows . You need a MINGW / Equivalent compiler and compile the same to .dll file as opposed to .so file .
+
+5.If you Have Troubles Working with generating shared library Run objdump -D lib.so to identify if the Function Implementation is there and the namespace isn't mangled..
+
+
+*/
 
 
 
 /*===========================  UTILITY FUNCTIONS ===========================  */
-
+/*
+Functions to perform primality check (nah.. just basic stuff). Check out Miller-Rabin Test of Primality...
+*/
 
 lli PrimeCheck(lli num){
 	if(num<2){return 0;}
@@ -62,6 +82,9 @@ lli PrimeCheck(lli num){
 	return 1;
 }
 
+/*
+Function to generate Prime Numbers within Range . Just BruteForce. 
+*/
 
 lli generatePrime(lli start_Range, lli EndRange){
 	lli prime;
@@ -79,7 +102,20 @@ lli generatePrime(lli start_Range, lli EndRange){
 
 
 /*===========================  SENDER FUNCTIONS    ============================*/
+/*
+Sender Native Functions (Prover Functions ):
+	1.Setup Phase:
+		 Prover Has a secret Key : s 
+		 And Sends Public Key to Reciever (Verifier)
+		
 
+	2.Commit Phase:
+		Chooses a random value and bound it by common n and Send the same 
+
+	3.Response Phase :
+		Respond to the challenge
+
+*/
 
 lli Setup_sender(fsp_snd* sender,lli n,lli secretKey){
 
@@ -105,6 +141,17 @@ lli response_phase(fsp_snd*send,lli challenge){
 
 
 /*==========================   RECIEVER FUNCTIONS   ==========================*/
+
+/*
+Reciever Native Functions:
+	1.Setup Reciever:
+		Choose Arbitrary prime and send n to prover (Registration Phase )
+	2.Challenge Prover:
+		Challenge Can be any Rand Number
+	3.Verify:
+		Verify the same recieved from Response Phase(Prover) with y**2%n
+
+*/
 
 
 lli Setup_reciever(fsp_recv*recv){
