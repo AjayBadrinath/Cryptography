@@ -5,6 +5,8 @@
 Fiat Shamir Protocol is one of Zero Knowledge Proof Protocol that doesn't require the sender to send his credentials . Instead One can prove his / her identity 
 by using Digital Signatures (sort of)
 
+![image](https://github.com/AjayBadrinath/Cryptography/assets/92035508/f22bd052-83c5-4499-9055-af5841ca9f29)
+
 
 <h3>Is this Secure ?</h3>
 
@@ -216,3 +218,6 @@ After this is done this should be a relatively well built Library which is cross
 
 See <a href="https://github.com/AjayBadrinath/Cryptography/tree/main/ZKP/Implementation"> Implementation </a>
 for implementation in Python using this Library with the help of ctypes
+
+#### Image Credits
+<a href="https://medium.com/asecuritysite-when-bob-met-alice/feige-fiat-shamir-and-zero-knowledge-proof-cdd2a972237c"> Medium </a>
