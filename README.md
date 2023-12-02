@@ -12,6 +12,7 @@ Ciphers   |<a href="https://github.com/AjayBadrinath/Cryptography/blob/main/Ciph
  &nbsp;	|<a href="https://github.com/AjayBadrinath/Cryptography/blob/main/Ciphers/vignere_v1.c" >Vignere </a>  |✔|<img src="https://upload.wikimedia.org/wikipedia/commons/1/18/C_Programming_Language.svg" width="20" height="20">
  SKE    |<a href="https://github.com/AjayBadrinath/Cryptography/tree/main/DES"> DES 56 </a> |✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
  &nbsp;| <a href="https://github.com/AjayBadrinath/Cryptography/tree/main/GOST(MAGMA)">GOST 28147-89 (Magma)</a>|✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-python-1-226045.png?f=webp&w=256" width="40" height="40">
+ &nbsp; |Кузнечик (GOST MAGMA - 128)|❌|
  ASKE   |<a href="https://github.com/AjayBadrinath/Cryptography/tree/main/RSA"> RSA  </a>   |✔|<img src="https://upload.wikimedia.org/wikipedia/commons/1/18/C_Programming_Language.svg" width="20" height="20">
  Hashing|<a href="https://github.com/AjayBadrinath/Cryptography/tree/main/MD5"> MD5  </a>    |✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
  &nbsp; |<a href="https://github.com/AjayBadrinath/Cryptography/tree/main/SHA"> SHA-256 </a>|✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
