@@ -19,7 +19,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <time.h>
-
+#include <omp.h>
 #define _MAGIC 1582734
 #define _MAGIC2 172626
 
@@ -46,6 +46,7 @@ uint64_t genPrime(uint64_t limit,uint64_t idx){
     
     uint32_t n=0,isq=0,jsq=0;
     uint64_t lim=(uint64_t)sqrt(limit)+1;
+    //#pragma omp parallel for
     for(uint64_t i=1;i<lim;i++){
         for(uint64_t j=1;j<lim;j++){
             isq=i*i;
@@ -59,7 +60,7 @@ uint64_t genPrime(uint64_t limit,uint64_t idx){
 
         }
     }
-    
+    //#pragma omp parallel for
     for (uint64_t k=5;k<lim;k++){
         if (_state[k]){
             uint64_t pow_k=k*k;
