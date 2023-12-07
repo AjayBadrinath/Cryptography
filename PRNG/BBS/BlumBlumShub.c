@@ -1,4 +1,3 @@
-
 /**
  * @file BlumBlumShub.c
  *                                              Blum Blum Shub Pseudo Random Number Generator
