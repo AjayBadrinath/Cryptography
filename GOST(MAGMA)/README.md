@@ -1,6 +1,6 @@
 ## гост (МАГМА) шифр ( GOST MAGMA Cipher )
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/AjayBadrinath/Cryptography/edit/main/GOST(MAGMA)/README.md)
-[![ru](https://img.shields.io/badge/lang-ru-blue.svg)]()
+[![ru](https://img.shields.io/badge/lang-ru-blue.svg)](https://github.com/AjayBadrinath/Cryptography/edit/main/GOST(MAGMA)/README.ru.md)
 
 ## History 
 
