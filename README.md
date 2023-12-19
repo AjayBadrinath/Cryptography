@@ -19,6 +19,8 @@ Ciphers   |<a href="https://github.com/AjayBadrinath/Cryptography/blob/main/Ciph
  &nbsp; |SHA -3 Keccack|❌
  &nbsp;|Стрибог (ГОСТ Р 34.11-2012) |❌
  HMAC|<a href ="https://github.com/AjayBadrinath/Cryptography/tree/main/HMAC">HMAC-SHA256(Yet to Test)</a>|✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
+ Key Exchange Protocol | Diffie Hellman Key Exchange |❌|
+ &nbsp;|Elliptic Curve Diffie Hellman (ECDH)|❌|
  Key Derivation Function | <a href="https://github.com/AjayBadrinath/Cryptography/tree/main/HMAC%20-%20PBKDF2"> HMAC-PBKDF2</a>|✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
  MFA - PoC |<a href="https://github.com/AjayBadrinath/Cryptography/tree/main/Auth"> MFA- Java Version</a> |✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="20" height="20" >
 PRNG |<a href ="https://github.com/AjayBadrinath/Cryptography/tree/main/PRNG/Mersenne%20Twister"> MT19937 </a>| ✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
