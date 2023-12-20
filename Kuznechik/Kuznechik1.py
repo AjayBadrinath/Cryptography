@@ -4,7 +4,7 @@
 
 Author: AjayBadrinath
 Date :  20-12-23
-Vesion :1.0
+Version :1.0
                 Version Changelog: (04-12-23)
                     1.Run Unit Test 
                     2.Yet to comment code
@@ -57,6 +57,28 @@ class Kuznechik:
     def __init__(self,message,key):
         self.message=message
         self.key=key
+
+    
+    def R_Transformation(self,x):
+        return ((self.linear_Transformation(x)<<120)^(x>>8))
+    
+    def R_Transformation_inverse(self,x):
+        return((x<<8)^self.linear_Transformation(x<<8^((x>>120)&0xff)))
+    
+    def L_Transformation(self,x):
+        for _ in range(16):
+            x=self.R_Transformation(x)
+        return x
+    
+    def L_Transformation_inverse(self,x):
+        
+        for _ in range(16):
+            x=self.R_Transformation_inverse(x)
+        return x&self.MASK_32
+    
+    def F_Transformation(self,c1,k1,k2):
+        return [self.L_Transformation(self.S_Transformation(c1^k1))^k2,k1]
+    
     def S_Transformation(self,x):
         s=0
         for i in range(15,-1,-1):
@@ -64,6 +86,7 @@ class Kuznechik:
             s^=(self.pi[(x>>8*i&0xff)])
             
         return s
+    
     def S_Inv_Transformation(self,x):
         s=0
         for i in range(15,-1,-1):
@@ -71,6 +94,7 @@ class Kuznechik:
             s^=(self.pi_inv[(x>>8*i&0xff)])
             
         return s
+    
     def M(self,x,y):
         c=0
         deg=0
@@ -81,12 +105,14 @@ class Kuznechik:
             deg+=1
             y>>=1
         return c
+    
     def degree_Poly(self,x):
         deg=0
         while x!=0:
             deg+=1
             x>>=1
         return deg
+    
     def Mod_Polynomial_Reduction(self,x,m):
         z=x
         while True:
@@ -107,31 +133,10 @@ class Kuznechik:
         return res
     
 
-    def R_Transformation(self,x):
-        return ((self.linear_Transformation(x)<<120)^(x>>8))
-    
-    def R_Transformation_inverse(self,x):
-        return((x<<8)^self.linear_Transformation(x<<8^((x>>120)&0xff)))
-    
-    def L_Transformation(self,x):
-        for _ in range(16):
-            x=self.R_Transformation(x)
-        return x
-    
+   
     def Round_constant(self,round_no):
-        
         return (self.L_Transformation(round_no))
     
-    def F_Transformation(self,c1,k1,k2):
-        return [self.L_Transformation(self.S_Transformation(c1^k1))^k2,k1]
-    
-    def L_Transformation_inverse(self,x):
-        
-        for _ in range(16):
-            x=self.R_Transformation_inverse(x)
-        return x&self.MASK_32
-    
-
     def Key_Schedule(self,key):
         
         k1=(key>>128)&self.MASK_32
@@ -149,45 +154,27 @@ class Kuznechik:
     def encrypt(self):
         a=self.message
         k=self.Key_Schedule(self.key)
-        cipher=0
         for i in range(9):
             
-            a=self.L_Transformation(self.S_Transformation(ks[i]^a))
+            a=self.L_Transformation(self.S_Transformation(k[i]^a))
 
-            #print(hex(a))
-
-        return a^ks[-1]
+        return a^k[-1]
     
 
     def decrypt(self,cipher):
+
         pt=cipher
         k=self.Key_Schedule(self.key)
+
         for i in (range(9,0,-1)):
-            pt=a.S_Inv_Transformation(a.L_Transformation_inverse(k[i]^pt))
+            pt=self.S_Inv_Transformation(self.L_Transformation_inverse(k[i]^pt))
 
             #print(hex(pt))
 
-        return pt^ks[0]
+        return pt^k[0]
         
         
 
 
 
 
-
-#print(hex(a.Mod_Polynomial_Reduction(0b11111100,0b100010)))
-#print(hex(a.R_Transformation(0x64a59400000000000000000000000000)))
-#print(hex(a.L_Transformation(a.S_Transformation(0xdc87ece4d890f4b3ba4eb92079cbeb02^0xc3d5fa01ebe36f7a9374427ad7ca8949))^0x8899aabbccddeeff0011223344556677))
-#print(hex(a.F_Transformation(0xdc87ece4d890f4b3ba4eb92079cbeb02,0x8899aabbccddeeff0011223344556677,0xfedcba98765432100123456789abcdef)))
- 
-k=0x8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef
-a=Kuznechik(0x1122334455667700ffeeddccbbaa9988,k)
-ks=a.Key_Schedule(k)
-a1=0xe297b686e355b0a1cf4a2f9249140830
-print(hex(a.S_Inv_Transformation(a.S_Transformation(0xb66cd8887d38e8d77765aeea0c9a7efc))))
-
-#print(len(a.Key_Schedule(0x8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef)))
-#print(hex(a.L_Transformation(a.S_Transformation(ks[1]^a1))))
-#print(hex(a.encrypt()))
-#print(hex(a.S_Inv_Transformation(a.L_Transformation_inverse(0xd8e40e4a800d06b2f1b37ea379ead8e))))
-print(hex(a.decrypt(0x7f679d90bebc24305a468d42b9d4edcd)))
