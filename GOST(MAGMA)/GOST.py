@@ -5,11 +5,11 @@
 
 Author: AjayBadrinath
 Date :  03-12-23
-Vesion :1.2
+Vesion :1.3
                 Version Changelog: (04-12-23)
                     1.Wrapped functions with class for Code Modularity
                     2.Added Comments & Docstring.
-                    3.Yet To perform Unit Test.
+                    3.Unit Test Pass 
 
 '''
 
@@ -228,29 +228,3 @@ class GOST_MAGMA:
 
 
 
-s=GOST_MAGMA(0x4ee901e5c2d8ca3d,0xffeeddccbbaa99887766554433221100f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff)
-print(hex(s.decrypt()))
-
-'''
-Test Cases...
-
-
-p=Transform(int("fdb97531",16))
-#print(hex(p))
-k=int("ffeeddccbbaa99887766554433221100f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff",16)
-#print(x)
-#p2=KeySchedule(x)
-#print(p2)
-#print(hex(encrypt(0xfedcba9876543210,0xffeeddccbbaa99887766554433221100f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff)))
-#print(hex(g_function(0x87654321,0xfedcba98)))
-print(hex(decrypt(0x4ee901e5c2d8ca3d,0xffeeddccbbaa99887766554433221100f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff)))
-
-
-
-
-def convert_binary(a:str):
-    binseq=''.join(format(ord(i),"08b") for i in a)
-    return binseq
-    
-#print(convert_binary("a"))
-'''
