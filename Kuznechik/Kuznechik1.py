@@ -5,13 +5,62 @@
 Author: AjayBadrinath
 Date :  20-12-23
 Version :1.0
-                Version Changelog: (04-12-23)
+                Version Changelog: (27-12-23)
                     1.Run Unit Test 
-                    2.Yet to comment code
+                    2.Added Comments
+                    3.Yet to Benchmark w.r.t -> Enc/Dec Speed && Mem Usage 
+
+'''
+'''
+
+
+    Class Implementing the Kuznechik Cipher . This is a cipher Proposed by the Russian Security Standard GOST.
+    
+    The Technical Specifications of this cipher are in the pdf archive in Russian :
+    https://web.archive.org/web/20150924113434/http://tc26.ru/standard/gost/GOST_R_3412-2015.pdf
+    
+    Compared to the previous implementation of the GOST(MAGMA) Cipher which is of 64 bit block,
+    
+    Kuznechik is a 128 bit block cipher unlike its cousin MAGMA it is rather based on SP Network rather than the 
+    Fiestel System .
+
+    Note: Reading the source and understanding the same WILL Require Some Elementary Knowledge of Galois Field Arithmetic + Number Theory . 
+    
+    Some transformations are done using the same Pls Refer:
+    
+        1.https://math.stackexchange.com/questions/245621/arithmetic-operations-in-galois-field
+        2.https://en.wikipedia.org/wiki/Kuznyechik
+        3.The Russian Spec itself
+        4.https://stackoverflow.com/questions/13202758/multiplying-two-polynomials
+    
 
 '''
 
+
 class Kuznechik:
+    '''
+    
+        This class encapsulates all the constants and the iterators in one single class module.
+        Although for the sake of readablity i should have made exported them as a constants module separately. 
+        
+        Constants:
+           
+            
+            Since this cipher is designed on the lines of Being a SP Network Cipher we have these s-boxes / permute-boxes.
+           
+            pi     : Used as non-linear bijective transformation    
+            
+            pi_inv : Used as non-linear bijective transformation
+            
+            Note   : Mathematically Speaking the inv (fn(x))->x 
+                So pi_inv(pi(x))=>x So the pi_inv can safely be called as pi inverse (inv_p-box)
+            
+            _map   : Iterator Array For the sake of conveinience used for Linear Transformation Constants (c)*nabla(x)
+            
+            MASK_32: This Acts as MASK as the name suggests to filter bits (32*4-bit )and prevent overflow 
+                    ik the name is misleading as it was named after 32 * hex not 32 bits so 128 bits(32*4)
+    
+    '''
     pi=[252, 238, 221, 17, 207, 110, 49, 22, 251, 196, 250, 218, 35, 197, 4, 77, 233,
     119, 240, 219, 147, 46, 153, 186, 23, 54, 241, 187, 20, 205, 95, 193, 249, 24, 101,
     90, 226, 92, 239, 33, 129, 28, 60, 66, 139, 1, 142, 79, 5, 132, 2, 174, 227, 106, 143,
@@ -55,31 +104,106 @@ class Kuznechik:
     MASK_32=0xffffffffffffffffffffffffffffffff       
 
     def __init__(self,message,key):
+        '''
+            Default Class Constructor . Implicitly called everytime the class is passed with an arguement.
+            Parameters:
+                Message:(128-bit)[ 1 block  ]
+                Key:256 bit key
+        
+        '''
         self.message=message
         self.key=key
 
     
     def R_Transformation(self,x):
+        '''
+            Tag: [Used in Encryption]
+            Function to perform R Transformation in the domain(V(128)->V(128))
+            
+            Parameters:
+                 x: 128 bit output from applying S-box transformation
+            
+            Returns:
+                 L(x(15)...x(0))||x(15)....x(1) -> 128 bit 
+        
+        '''
         return ((self.linear_Transformation(x)<<120)^(x>>8))
     
     def R_Transformation_inverse(self,x):
+        '''
+            Tag:[ Used in Decryption ]
+            Function to perform the inverse of R_Transformation in the domain(V(128)->V(128)) 
+
+            Parameters:
+                x: 128 bit input from L_Transformation_inverse function 
+            Returns   :
+                x(14)||x(13)...||x(0)||L(x(14)||x(13)||...||x(0)||x(15)) -> 128 bit 
+
+        '''
         return((x<<8)^self.linear_Transformation(x<<8^((x>>120)&0xff)))
     
     def L_Transformation(self,x):
+        '''
+            Tag: [ Used in Encryption ]
+            Another Native Function to Kuznechik cipher to Apply R_Transformation func 16 times with the same domain. 
+            
+            Parameters:
+                x: 128 bit input for which R_Transformation function has to be applied
+            
+            Returns:
+                R_Transformation(R_Transformation....(x)) iterated 16 times -> 128 bits 
+
+        '''
         for _ in range(16):
             x=self.R_Transformation(x)
         return x
     
     def L_Transformation_inverse(self,x):
-        
+        '''
+            Tag: [ Used in Decryption ]
+            Native function that Applies the inverse of the L_Transformation by implicitly calling the R_Transformation_inverse function. Same domain Mapping.
+            
+            Parameters:
+                x: 128 bit input for which R_Transformation_inverse function has to be applied
+            Returns:
+                (R_Transformation_inverse(R_Transformation_inverse(....(x))) iterated 16 times) -> 128 bits 
+                
+
+        '''
         for _ in range(16):
             x=self.R_Transformation_inverse(x)
         return x&self.MASK_32
     
     def F_Transformation(self,c1,k1,k2):
+        '''
+            Tag:[Used in Key Schedule]
+            Native function for Key Generation or Key Schedule Generation . 
+            If you notice Interstingly this cipher follows a pattern of Fiestel Network for Key Schedule.
+            Parameters:
+                Key1:256 bit keys (Apply Combinations of Transformations to this )
+                Key2:256 bit keys  (Nothing done here . Just return the same key as is )
+                Round_Constant: Passed implicitly from the Round_constant function defined.
+            Returns: 
+                Array(L(S(roundconst^k1)),k2)
+
+
+        '''
         return [self.L_Transformation(self.S_Transformation(c1^k1))^k2,k1]
     
     def S_Transformation(self,x):
+        '''
+            Tag:[Used in Encryption]
+            Function to Apply pi(p-box )to the input in the domain (V(128)->V(128)).
+
+            Parameters:
+                x: 128 bit input to Be substituted with pi
+            Returns   :
+                pi(x) with each nibble .
+
+
+
+        '''
+
         s=0
         for i in range(15,-1,-1):
             s<<=8
@@ -88,6 +212,17 @@ class Kuznechik:
         return s
     
     def S_Inv_Transformation(self,x):
+
+        '''
+            Tag:[ Used in Decryption ]
+            Function to Apply pi_inv(p_inv-box )to the input in the domain (V(128)->V(128)). 
+
+            Parameters:
+                x: 128 bit input to Be substituted with pi_inv
+            Returns   :
+                pi_inv(x) with each nibble .
+
+        '''
         s=0
         for i in range(15,-1,-1):
             s<<=8
@@ -96,6 +231,18 @@ class Kuznechik:
         return s
     
     def M(self,x,y):
+        '''
+            Tag:[Misc.]
+            The Delta Function Defined in the GOST Spec .
+            Utility Function to Multiply two Polynomials in binary to put it simply.
+            Essentially applies (x<< degree y)+(x<<degree  y)...where + refers to xor operation
+            Parameters:
+                x: Binary Polynomial 
+                y: Binary Polynomial
+            Returns:
+                x*y -> Product of two polynomials.
+
+        '''
         c=0
         deg=0
         while y!=0:
@@ -107,6 +254,17 @@ class Kuznechik:
         return c
     
     def degree_Poly(self,x):
+        '''
+            Tag:[Misc]
+            This is a helper function for Mod_Reduction. Computes the highest degree for a given polynomial:
+            eg:11010 -> 4
+
+            Parameters:
+                x: A binary Number / Polynomial Representation 
+            Returns:
+                Highest Degree for the given polynomial
+
+        '''
         deg=0
         while x!=0:
             deg+=1
@@ -114,6 +272,24 @@ class Kuznechik:
         return deg
     
     def Mod_Polynomial_Reduction(self,x,m):
+
+        '''
+            Tag:[Misc]
+            Function to compute Mod for a given binary Polynomial in the field of GF(2) F->{0,1}
+            Essentially iterate till deg(z) <deg(mod):while performing (m<<diff) whrere diff is the 
+            difference between the highest power of z and m itself
+
+            Parameters:
+                x:A binary polynomial to be reduced.
+                m:Modulus binary Number .(For this Cipher We use )
+                GF(2)[x]->p(x)=x**8+x**7+x**6+x+1 (111000011) as mod
+
+            Returns:
+                z mod m
+            
+
+
+        '''
         z=x
         while True:
             if(self.degree_Poly(z)<self.degree_Poly(m)):
@@ -125,6 +301,19 @@ class Kuznechik:
         return z
     
     def linear_Transformation(self,x):
+        '''
+            Tag:[Used in Encryption][Used in Decryption]
+            Transformation proposed in the GOST Specification with Mapping Domain : V(8) ->V(8) 
+            Apply nabla(_map[iter]*delta(x))
+            Parameter:
+                x: input to transform
+            Returns:
+                LinearTransformation(x(15)||...||x(0))
+            
+
+
+
+        '''
         _map_=[148,32,133,16,194,192,1,251,1,192,194,16,133,32,148,1][::-1]
         res=0
 
@@ -135,9 +324,34 @@ class Kuznechik:
 
    
     def Round_constant(self,round_no):
+        '''
+            Tag:[Used in Key Schedule]
+            Utility Function Explicitly Written for sake of readablity .
+            Computes the RoundConstant c by applying L_Transformation
+            Parameters:
+                round_no: Number {0...9}
+            Returns:
+                L_Transformation(round_no) -> 256 bit
+        '''
+
         return (self.L_Transformation(round_no))
     
     def Key_Schedule(self,key):
+
+        '''
+            This is the Function to perform Key Deployment from the initial key.
+            This Key deployment algorithm uses Fiestel system to Get Separate Keys for each Round/iteration.
+            initial keys:k>>128,k&mask_32
+            Each set of keys obtained from each iteration are applied the F_Transformation.
+            Every 8th iteration keys thus obtained is added to key_list.
+
+            Parameters:
+                Key:256 Pseudorandomly generated Key 
+            Returns: 
+                KeySchedule Array of Size 10
+
+        
+        '''
         
         k1=(key>>128)&self.MASK_32
         k2=(key)&self.MASK_32
@@ -152,6 +366,15 @@ class Kuznechik:
     
 
     def encrypt(self):
+        '''
+            Function To Encrypt Bloc Using Kuznechik Cipher .
+            Uses all the function marked as [Used in Encryption] tag in the docstring.
+            Parameters:
+                None
+                Implicitly uses the KeySchedule array for each round and apply L_Transformation(S(round_key^msg))
+            Returns:
+                128 bit Encrypted Cipher block
+        '''
         a=self.message
         k=self.Key_Schedule(self.key)
         for i in range(9):
@@ -162,7 +385,15 @@ class Kuznechik:
     
 
     def decrypt(self,cipher):
-
+        '''
+            Function To Decrypt Block Using Kuznechik Cipher .
+            Uses all the function marked as [Used in Decryption] tag in the docstring.
+            Parameters:
+                None
+                Implicitly uses the KeySchedule array for each round and apply (S_inv(L_Transformation_inverse(round_key^cipher)))
+            Returns:
+                128 bit Decrypted Cipher block
+        '''
         pt=cipher
         k=self.Key_Schedule(self.key)
 
