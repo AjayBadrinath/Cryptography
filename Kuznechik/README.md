@@ -1,6 +1,6 @@
 # 	Кузнечик шифр  (GOST Kuznechik - 128) 
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/AjayBadrinath/Cryptography/blob/main/GOST(MAGMA)/README.md)
-[![ru](https://img.shields.io/badge/lang-ru-blue.svg)](https://github.com/AjayBadrinath/Cryptography/blob/main/GOST(MAGMA)/README.ru.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/AjayBadrinath/Cryptography/blob/main/Kuznechik/README.md)
+[![ru](https://img.shields.io/badge/lang-ru-blue.svg)](https://github.com/AjayBadrinath/Cryptography/blob/main/Kuznechik/README.ru.md)
 
 ## History 
 
