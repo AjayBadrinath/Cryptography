@@ -297,3 +297,5 @@ for i in (range(9,0,-1)):
       pt=self.S_Inv_Transformation(self.L_Transformation_inverse(k[i]^pt))
 return pt^k[0]
 ```
+### Реализация
+Ознакомьтесь с <a href ="https://github.com/AjayBadrinath/Cryptography/tree/main/Utils/FileCrypt">FileCrypt</a>, где я использовал свою реализацию Кузнечик шифр для шифрования файлов. (Мне еще предстоит улучшить его производительность как таковую.).
