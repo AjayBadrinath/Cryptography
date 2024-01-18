@@ -19,6 +19,7 @@ Version :1.0
 #include <stdint.h>
 #include <stdlib.h>
 #include <gmp.h>
+#include <assert.h>
 int  pi[]={
     252, 238, 221, 17, 207, 110, 49, 22, 251, 196, 250, 218, 35, 197, 4, 77, 233,
 119, 240, 219, 147, 46, 153, 186, 23, 54, 241, 187, 20, 205, 95, 193, 249, 24, 101,
@@ -62,7 +63,16 @@ int pi_inv[]={
     76, 215, 116 
 };
 
-#define mask 0xffffffffffffffffffffffffffffffff
+#define mask_128 "ffffffffffffffffffffffffffffffff"
+/**
+ * @brief 
+ *  Functions pertaining to gmp returns void . as params are implicitly changed 
+ * 
+ * @param res 
+ * @param x 
+ */
+void linear_Transformation(mpz_t ,mpz_t );
+void L_Transformation(mpz_t ,mpz_t );
 void S_Transformation(mpz_t res,mpz_t x){
     mpz_t s,tmp,tmp2,x_tmp;
     mpz_init(s);
@@ -98,6 +108,7 @@ void S_Transformation(mpz_t res,mpz_t x){
     mpz_clear(mask_8);
     mpz_clear(x_tmp);
 }
+
 void S_Inv_Transformation(mpz_t res,mpz_t x){
     mpz_t s,tmp,tmp2,x_tmp;
     mpz_init(s);
@@ -137,14 +148,33 @@ void S_Inv_Transformation(mpz_t res,mpz_t x){
 
 int deg_Poly_V_128(mpz_t x){
     int deg=0;
-    while (mpz_get_ui(x)!=0){
+    mpz_t tmp;
+    mpz_init(tmp);
+    mpz_set(tmp,x);
+    while (mpz_get_ui(tmp)!=0){
         deg++;
-        mpz_tdiv_q_2exp(x,x,1);
+        mpz_tdiv_q_2exp(tmp,tmp,1);
     }
+    mpz_clear(tmp);
     return deg;
 
 }
+void R_Transformation(mpz_t res,mpz_t x){
+    mpz_t _res_lin_,_shift_r_120,_shr_8,_xor_;
+    mpz_init(_res_lin_);
+    mpz_init(_shift_r_120);
+    mpz_init(_shr_8);
+    mpz_init(_xor_);
+    linear_Transformation(_res_lin_,x);
+    mpz_mul_2exp(_shift_r_120,_res_lin_,120);
+    mpz_tdiv_q_2exp(_shr_8,x,8);
+    mpz_xor(res,_shift_r_120,_shr_8);
+    mpz_clear(_res_lin_);
+    mpz_clear(_shift_r_120);
+    mpz_clear(_shr_8);
+    mpz_clear(_xor_);
 
+}
 
 void Multiply_Poly_V_128(mpz_t res,mpz_t x ,mpz_t y){
     mpz_t c,lsh_deg,tmp,ones;
@@ -173,16 +203,197 @@ void Multiply_Poly_V_128(mpz_t res,mpz_t x ,mpz_t y){
 
 
 }
+void Mod_Poly_Reduction(mpz_t res,mpz_t x,mpz_t m){
+    mpz_t z,tmp;
+    mpz_init(z);
+   // mpz_init(difference);
+    mpz_init(tmp);
+    int difference=0;
+    mpz_set(z,x);
 
+    while (1){
+        if((deg_Poly_V_128(z)<deg_Poly_V_128(m))){
+            break;
+        }
+        else{
+            difference=deg_Poly_V_128(z)-deg_Poly_V_128(m);
+
+            mpz_mul_2exp(tmp,m,difference);
+            mpz_xor(z,z,tmp);
+
+        }
+    }
+    mpz_set(res,z);
+    mpz_clear(tmp);
+    mpz_clear(z);
+}
+
+void linear_Transformation(mpz_t res,mpz_t x){
+    int _map_[]={
+        1, 148, 32, 133, 16, 194, 192, 1, 251, 1, 192, 194, 16, 133, 32, 148
+    };
+    mpz_t _tmp_shift_8,_tmp_mask,_tmp_8_and,m_res,V_8_Field,_mod_res,_m;
+    mpz_init(_m);
+    mpz_init(_tmp_shift_8);
+    mpz_init(_tmp_mask);
+    mpz_init(_tmp_8_and);
+    mpz_init(m_res);
+    mpz_init(V_8_Field);
+    mpz_init(_mod_res);
+    mpz_set_str(V_8_Field,"111000011",2);
+    mpz_set_str(_tmp_mask,"ff",16);
+    
+    for (int i=15;i>=0;i--){
+        mpz_tdiv_q_2exp(_tmp_shift_8,x,8*i);
+        mpz_and(_tmp_8_and,_tmp_shift_8,_tmp_mask);
+        mpz_set_ui(_m,_map_[i]);
+        Multiply_Poly_V_128(m_res,_tmp_8_and,_m);
+        Mod_Poly_Reduction(_mod_res,m_res,V_8_Field);
+        
+    }
+    mpz_clear(_tmp_shift_8);
+    mpz_clear(_tmp_mask);
+    mpz_clear(_tmp_8_and);
+    mpz_clear(V_8_Field);
+    mpz_clear(m_res);
+    mpz_clear(_mod_res);
+    mpz_clear(_m);
+
+}
+
+void Round_constant(mpz_t res,int round_no){
+    mpz_t rno;
+    mpz_init(rno);
+    mpz_set_ui(rno,round_no);
+    L_Transformation(res,rno);
+    mpz_clear(rno);
+}
+void L_Transformation(mpz_t res,mpz_t x){
+    mpz_t tmp;
+    mpz_init(tmp);
+    mpz_set(tmp,x);
+    for (int i=0;i<16;i++){
+        R_Transformation(tmp,tmp);
+    }
+    mpz_set(res,tmp);
+    mpz_clear(tmp);
+
+}
+void L_Transformation_inverse(mpz_t res,mpz_t x){
+    mpz_t tmp;
+    mpz_init(tmp);
+    mpz_set(tmp,x);
+    for (int i=0;i<16;i++){
+        R_Transformation_inverse(tmp,tmp);
+    }
+    mpz_set(res,tmp);
+    mpz_clear(tmp);
+
+}
+
+mpz_t* F_Transformation(mpz_t round_const,mpz_t k1,mpz_t k2){
+    mpz_t * arr=malloc(sizeof(mpz_t)*2);
+    mpz_t _c1_xor_k1_,_S_tmp_,_L_tmp,_LSX_xor_k2;
+    mpz_init(_c1_xor_k1_);
+    mpz_init(_S_tmp_);
+    mpz_init(_L_tmp);
+    mpz_init(_LSX_xor_k2);
+    mpz_xor(_c1_xor_k1_,round_const,k1);
+    S_Transformation(_S_tmp_,_c1_xor_k1_);
+    L_Transformation(_L_tmp,_S_tmp_);
+    mpz_xor(_LSX_xor_k2,_L_tmp,k2);
+    mpz_set(*(arr++),_LSX_xor_k2);
+    mpz_set(*(arr++),k2);
+    
+    mpz_clear(_c1_xor_k1_);
+    mpz_clear(_S_tmp_);
+    mpz_clear(_L_tmp);
+    mpz_clear(_LSX_xor_k2);
+
+    return arr;
+}
+mpz_t * Key_Schedule(mpz_t key){
+    mpz_t * key_arr=malloc(sizeof(mpz_t)*10);
+    mpz_t k1,k2,mask,_shr_128,_and_mask,rnd_const;
+    mpz_init(k1);
+    mpz_init(k2);
+    mpz_init(mask);
+    mpz_init(rnd_const);
+    mpz_init(_shr_128);
+    mpz_init(_and_mask);
+    mpz_set_str(mask,mask_128,16);
+    mpz_tdiv_q_2exp(_shr_128,key,128);
+    mpz_and(_and_mask,_shr_128,mask);
+    mpz_set(k1,_and_mask);
+    mpz_and(_and_mask,key,mask);
+    mpz_set(k2,_and_mask);
+    mpz_set(*(key_arr++),k1);
+    mpz_set(*(key_arr++),k2);
+    mpz_t * arr=malloc(sizeof(mpz_t)*2);
+
+    for (int i=1;i<=32;i++){
+        Round_constant(rnd_const,i);
+        arr=F_Transformation(rnd_const,k1,k2);
+        mpz_set(k1,*(arr++));
+        mpz_set(k2,*(arr));
+        if(i%8==0){
+            mpz_set(*(key_arr++),k1);
+            mpz_set(*(key_arr++),k2);
+        }
+    }
+    mpz_clear(k1);
+    mpz_clear(k2);
+    mpz_clear(mask);
+    mpz_clear(rnd_const);
+    mpz_clear(_shr_128);
+    mpz_clear(_and_mask);
+    return key_arr;
+}
+void encrypt(mpz_t res,mpz_t message,mpz_t key){
+    mpz_t * key_arr=malloc(sizeof(mpz_t)*10);
+
+    mpz_t msg,_xor,_Sx_,_lsx_;
+    mpz_init(_xor);
+    mpz_init(_Sx_);
+    mpz_init(_lsx_);
+    mpz_init(msg);
+    mpz_set(msg,message);
+
+    key_arr=Key_Schedule(key);
+    for (int i=0;i<9;i++){
+        mpz_xor(_xor,key_arr[i],msg);
+        S_Transformation(_Sx_,_xor);
+        L_Transformation(_lsx_,_Sx_);
+        mpz_set(msg,_lsx_);
+
+    }
+    mpz_xor(res,msg,key_arr[9]);
+    mpz_clear(_xor);
+    mpz_clear(_Sx_);
+    mpz_clear(_lsx_);
+    mpz_clear(msg);
+}
 int main(){
 //printf("%lx",S_Transformation(0xffeeddccbbaa99881122334455667700)>>32);
-mpz_t test,res;
+mpz_t test,msg,res,key,x,m;
 mpz_init(test);
 mpz_init(res);
+mpz_init(key);
+mpz_init(x);
+mpz_init(m);
+
+mpz_set_str(x,"11111100",2);
+mpz_set_str(m,"100010",2);
+mpz_init(msg);
+mpz_set_str(key,"8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef",16);
+mpz_set_str(msg,"1122334455667700ffeeddccbbaa9988",16);
+
 mpz_set_ui(res,10);
 mpz_set_str(test,"b66cd8887d38e8d77765aeea0c9a7efc",16);
+encrypt(res,msg,key);
+//Mod_Poly_Reduction(res,x,m);
 //S_Transformation(res,test);
 //S_Inv_Transformation(res,res);
-Multiply_Poly_V_128(res,test,test);
+//Multiply_Poly_V_128(res,test,test);
 gmp_printf("Val: %Zx\n", res);
 }
