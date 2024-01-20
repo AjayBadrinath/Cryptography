@@ -160,15 +160,22 @@ int deg_Poly_V_128(mpz_t x){
 
 }
 void R_Transformation(mpz_t res,mpz_t x){
-    mpz_t _res_lin_,_shift_r_120,_shr_8,_xor_;
+    mpz_t _res_lin_,_shift_r_120,_shr_8,_xor_,result,_x;
     mpz_init(_res_lin_);
+    mpz_init(result);
+    mpz_init(_x);
+    mpz_set(_x,x);
     mpz_init(_shift_r_120);
     mpz_init(_shr_8);
     mpz_init(_xor_);
-    linear_Transformation(_res_lin_,x);
+    linear_Transformation(_res_lin_,_x);
     mpz_mul_2exp(_shift_r_120,_res_lin_,120);
-    mpz_tdiv_q_2exp(_shr_8,x,8);
-    mpz_xor(res,_shift_r_120,_shr_8);
+    mpz_tdiv_q_2exp(_shr_8,_x,8);
+    mpz_xor(result,_shift_r_120,_shr_8);
+    mpz_set(res,result);
+    //gmp_printf("resutltt: %Zx\n", result);
+    mpz_clear(_x);
+    mpz_clear(result);
     mpz_clear(_res_lin_);
     mpz_clear(_shift_r_120);
     mpz_clear(_shr_8);
@@ -243,7 +250,7 @@ void linear_Transformation(mpz_t res,mpz_t x){
     mpz_set_str(V_8_Field,"111000011",2);
     mpz_set_str(_tmp_mask,"ff",16);
     
-    for (int i=15;i>=0;i--){
+    for (int i=0;i<=15;i++){
         mpz_tdiv_q_2exp(_tmp_shift_8,x,8*i);
         mpz_and(_tmp_8_and,_tmp_shift_8,_tmp_mask);
         mpz_set_ui(_m,_map_[i]);
@@ -251,6 +258,7 @@ void linear_Transformation(mpz_t res,mpz_t x){
         Mod_Poly_Reduction(_mod_res,m_res,V_8_Field);
         
     }
+    mpz_set(res,_mod_res);
     mpz_clear(_tmp_shift_8);
     mpz_clear(_tmp_mask);
     mpz_clear(_tmp_8_and);
@@ -262,10 +270,15 @@ void linear_Transformation(mpz_t res,mpz_t x){
 }
 
 void Round_constant(mpz_t res,int round_no){
-    mpz_t rno;
+    mpz_t rno,result;
     mpz_init(rno);
+    mpz_init(result);
+    
     mpz_set_ui(rno,round_no);
-    L_Transformation(res,rno);
+    L_Transformation(result,rno);
+    //gmp_printf("RC: %Zx\n",rno);
+    mpz_set(res,result);
+    mpz_clear(result);
     mpz_clear(rno);
 }
 void L_Transformation(mpz_t res,mpz_t x){
@@ -284,15 +297,24 @@ void L_Transformation_inverse(mpz_t res,mpz_t x){
     mpz_init(tmp);
     mpz_set(tmp,x);
     for (int i=0;i<16;i++){
-        R_Transformation_inverse(tmp,tmp);
+       // R_Transformation_inverse(tmp,tmp);
+
     }
     mpz_set(res,tmp);
     mpz_clear(tmp);
 
 }
+int * p(int a,int b){
+    int * a1=malloc(sizeof(int)*2);
+    int*tmp=a1;
+    *(a1)=a;
+    *(a1+1)=b;
+    return a1;
+}
+mpz_t*  F_Transformation(mpz_t round_const,mpz_t k1,mpz_t k2){
+    mpz_t * arr=(mpz_t*)malloc(sizeof(mpz_t)*2);
+    mpz_t* temp=arr;
 
-mpz_t* F_Transformation(mpz_t round_const,mpz_t k1,mpz_t k2){
-    mpz_t * arr=malloc(sizeof(mpz_t)*2);
     mpz_t _c1_xor_k1_,_S_tmp_,_L_tmp,_LSX_xor_k2;
     mpz_init(_c1_xor_k1_);
     mpz_init(_S_tmp_);
@@ -302,9 +324,10 @@ mpz_t* F_Transformation(mpz_t round_const,mpz_t k1,mpz_t k2){
     S_Transformation(_S_tmp_,_c1_xor_k1_);
     L_Transformation(_L_tmp,_S_tmp_);
     mpz_xor(_LSX_xor_k2,_L_tmp,k2);
-    mpz_set(*(arr++),_LSX_xor_k2);
-    mpz_set(*(arr++),k2);
-    
+    mpz_set(*(temp++),_LSX_xor_k2);
+    mpz_set(*(temp++),k2);
+    gmp_printf("Val: %Zx\n",arr[0]);
+
     mpz_clear(_c1_xor_k1_);
     mpz_clear(_S_tmp_);
     mpz_clear(_L_tmp);
@@ -312,12 +335,17 @@ mpz_t* F_Transformation(mpz_t round_const,mpz_t k1,mpz_t k2){
 
     return arr;
 }
-mpz_t * Key_Schedule(mpz_t key){
+void Key_Schedule(mpz_t key){
+    printf("IN KEY_SCHED");
     mpz_t * key_arr=malloc(sizeof(mpz_t)*10);
-    mpz_t k1,k2,mask,_shr_128,_and_mask,rnd_const;
+    
+
+    mpz_t k1,k2,mask,_shr_128,_and_mask,rnd_const,tmp1,tmp2;
     mpz_init(k1);
     mpz_init(k2);
+    mpz_init(tmp2);
     mpz_init(mask);
+    mpz_init(tmp1);
     mpz_init(rnd_const);
     mpz_init(_shr_128);
     mpz_init(_and_mask);
@@ -327,31 +355,56 @@ mpz_t * Key_Schedule(mpz_t key){
     mpz_set(k1,_and_mask);
     mpz_and(_and_mask,key,mask);
     mpz_set(k2,_and_mask);
-    mpz_set(*(key_arr++),k1);
-    mpz_set(*(key_arr++),k2);
+    int idx=0;
+    mpz_set(key_arr[idx++],k1);
+    mpz_set(key_arr[idx++],k2);
     mpz_t * arr=malloc(sizeof(mpz_t)*2);
-
+    mpz_init(arr[0]);
+    mpz_init(arr[1]);
+    Round_constant(rnd_const,  2);
+    gmp_printf("rc: %Zx\n", rnd_const);
+    /*
     for (int i=1;i<=32;i++){
         Round_constant(rnd_const,i);
-        arr=F_Transformation(rnd_const,k1,k2);
-        mpz_set(k1,*(arr++));
-        mpz_set(k2,*(arr));
+        //gmp_printf("aaaaah: %Zx\n", F_Transformation(rnd_const,k1,k2)[0]);
+        mpz_set(tmp1,F_Transformation(rnd_const,k1,k2)[0]);
+        mpz_set(tmp2,F_Transformation(rnd_const,k1,k2)[1]);
+
+        mpz_set(arr[0],tmp1);
+        mpz_set(arr[1],tmp2);
+
+
+
+        
+        gmp_printf("Valsjs: %Zx\n", k1);
+       
+        
+        
+        gmp_printf("Valsjs: %Zx\n", k1);
         if(i%8==0){
-            mpz_set(*(key_arr++),k1);
-            mpz_set(*(key_arr++),k2);
+            gmp_printf("Val: %Zx\n", k1);
+            //mpz_set(key_arr[idx++],k1);
+            //mpz_set(key_arr[idx++],k2);
         }
-    }
+    }*/
+    mpz_set(tmp1,F_Transformation(rnd_const,k1,k2)[1]);
+    mpz_set(arr[0],tmp1);
+       // mpz_set(arr[1],F_Transformation(rnd_const,k1,k2)[1]);
+    gmp_printf("Valsjs: %Zx\n", arr[0]);
     mpz_clear(k1);
     mpz_clear(k2);
+    mpz_clear(tmp1);
+    mpz_clear(tmp2);
     mpz_clear(mask);
     mpz_clear(rnd_const);
     mpz_clear(_shr_128);
     mpz_clear(_and_mask);
-    return key_arr;
+    
+    //return key_arr;
 }
 void encrypt(mpz_t res,mpz_t message,mpz_t key){
     mpz_t * key_arr=malloc(sizeof(mpz_t)*10);
-
+    printf("IN ENC");
     mpz_t msg,_xor,_Sx_,_lsx_;
     mpz_init(_xor);
     mpz_init(_Sx_);
@@ -359,7 +412,7 @@ void encrypt(mpz_t res,mpz_t message,mpz_t key){
     mpz_init(msg);
     mpz_set(msg,message);
 
-    key_arr=Key_Schedule(key);
+    //key_arr=Key_Schedule(key);
     for (int i=0;i<9;i++){
         mpz_xor(_xor,key_arr[i],msg);
         S_Transformation(_Sx_,_xor);
@@ -388,12 +441,17 @@ mpz_init(msg);
 mpz_set_str(key,"8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef",16);
 mpz_set_str(msg,"1122334455667700ffeeddccbbaa9988",16);
 
-mpz_set_ui(res,10);
+//mpz_set_ui(res,10);
 mpz_set_str(test,"b66cd8887d38e8d77765aeea0c9a7efc",16);
-encrypt(res,msg,key);
+//encrypt(res,msg,key);
+//Key_Schedule(key);
+L_Transformation(res,key);
+printf("helo%d\n",*(p(12,45)+1));
+//F_Transformation(x,key,msg);
+//gmp_printf("Val: %Zx\n",F_Transformation(x,key,msg)[1]);
 //Mod_Poly_Reduction(res,x,m);
 //S_Transformation(res,test);
 //S_Inv_Transformation(res,res);
 //Multiply_Poly_V_128(res,test,test);
-gmp_printf("Val: %Zx\n", res);
+gmp_printf("Valres: %Zx\n", res);
 }
