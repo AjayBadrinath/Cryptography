@@ -4,12 +4,14 @@
 
 Author: AjayBadrinath
 Date :  18-01-24
-Version :1.2
-                Version Changelog: (23-01-24)
+Version :1.4
+                Version Changelog: (25-01-24)
                     1.Ported  From Python ...     (_/)
                     2.Extended Support For Arbitrary Prescision Numbers(gmp).(_/)
                     3.Ported comments.
-                    4.Parallize operation with openmpi.(X)
+                    4.Parallize operation with openmpi.(partly) Optimizing the heck off this
+                    5. Performance Boost 100% (40 ms ENC OP to 4 ms).
+                    6. Current Encryption Rate 6kbps. Need to Bump to 1Mbps.
 
 
 C Header Implementing the Kuznechik Cipher . This is a cipher Proposed by the Russian Security Standard GOST.
@@ -40,6 +42,10 @@ C Header Implementing the Kuznechik Cipher . This is a cipher Proposed by the Ru
 #include <stdlib.h>
 #include <gmp.h>
 #include <assert.h>
+#include <sys/time.h>
+#include <time.h>
+#include <omp.h>
+
 /**
  * @brief 
  * Constants:
@@ -131,7 +137,7 @@ int pi_inv[]={
 void S_Transformation(mpz_t ,mpz_t );
 void L_Transformation(mpz_t ,mpz_t );
 void R_Transformation(mpz_t ,mpz_t );
-void encrypt(mpz_t ,mpz_t ,mpz_t );
+void encrypt(mpz_t ,mpz_t ,mpz_t ,mpz_t*);
 
 
 
@@ -482,13 +488,15 @@ void Mod_Poly_Reduction(mpz_t res,mpz_t x,mpz_t m){
     mpz_init(tmp);
     int difference=0;
     mpz_set(z,x);
-
+    int tmp1,tmp2;
     while (1){
-        if((deg_Poly_V_128(z)<deg_Poly_V_128(m))){
+        tmp1=deg_Poly_V_128(z);
+        tmp2=deg_Poly_V_128(m);
+        if((tmp1<tmp2)){
             break;
         }
         else{
-            difference=deg_Poly_V_128(z)-deg_Poly_V_128(m);
+            difference=tmp1-tmp2;
 
             mpz_mul_2exp(tmp,m,difference);
             mpz_xor(z,z,tmp);
@@ -497,6 +505,8 @@ void Mod_Poly_Reduction(mpz_t res,mpz_t x,mpz_t m){
     }
     mpz_set(res,z);
     mpz_clear(tmp);
+    //mpz_clear(tmp1);
+    //mpz_clear(tmp2);
     mpz_clear(z);
 }
 
@@ -516,10 +526,13 @@ void Mod_Poly_Reduction(mpz_t res,mpz_t x,mpz_t m){
  */
 
 void linear_Transformation(mpz_t res,mpz_t x){
+    
     int _map_[]={
         1, 148, 32, 133, 16, 194, 192, 1, 251, 1, 192, 194, 16, 133, 32, 148
     };
+    
     mpz_t _tmp_shift_8,_tmp_mask,_tmp_8_and,m_res,V_8_Field,_mod_res,_m,_x,_res;
+    
     mpz_init(_x);
     mpz_init(_res);
     mpz_set(_x,x);
@@ -533,7 +546,7 @@ void linear_Transformation(mpz_t res,mpz_t x){
     mpz_init(_mod_res);
     mpz_set_str(V_8_Field,"111000011",2);
     mpz_set_str(_tmp_mask,"ff",16);
-    
+    #pragma omp for
     for (int i=15;i>=0;i--){
         mpz_tdiv_q_2exp(_tmp_shift_8,_x,8*i);
         mpz_and(_tmp_8_and,_tmp_shift_8,_tmp_mask);
@@ -543,6 +556,7 @@ void linear_Transformation(mpz_t res,mpz_t x){
         mpz_xor(_res,_res,_mod_res);
         
     }
+    
     mpz_set(res,_res);
     mpz_clear(_tmp_shift_8);
     mpz_clear(_x);
@@ -606,6 +620,7 @@ void L_Transformation(mpz_t res,mpz_t x){
     mpz_t tmp;
     mpz_init(tmp);
     mpz_set(tmp,x);
+    #pragma omp for
     for (int i=0;i<16;i++){
         R_Transformation(tmp,tmp);
     }
@@ -797,12 +812,13 @@ mpz_t* Key_Schedule(mpz_t key){
  * @param key 
  */
 
-void encrypt(mpz_t res,mpz_t message,mpz_t key){
+void encrypt(mpz_t res,mpz_t message,mpz_t key,mpz_t*key_arr){
     mpz_t * key_arr_=malloc(sizeof(mpz_t)*10);
     mpz_t msg,_xor,_Sx_,_lsx_,_key,_res;
     for(int i=0;i<10;i++){
         mpz_init(key_arr_[i]);
     }
+    key_arr_=key_arr;
     mpz_init(_xor);
     mpz_init(_Sx_);
     mpz_init(_res);
@@ -812,15 +828,20 @@ void encrypt(mpz_t res,mpz_t message,mpz_t key){
     mpz_set(msg,message);
 
     mpz_set(_key,key);
-    key_arr_=Key_Schedule(_key);
+    //key_arr_=Key_Schedule(_key);
+    key_arr_=key_arr;
     //gmp_printf("ms: %Zx\n", _lsx_);
+    #pragma omp for
     for (int i=0;i<9;i++){
         mpz_xor(_xor,key_arr_[i],msg);
+        
         S_Transformation(_Sx_,_xor);
+        
         L_Transformation(_lsx_,_Sx_);
         mpz_set(msg,_lsx_);
         //gmp_printf("keyarr: %Zx\n",msg );
     }
+    
     mpz_xor(_res,msg,key_arr_[9]);
     mpz_set(res,_res);
     
@@ -863,6 +884,7 @@ void decrypt(mpz_t res,mpz_t cipher,mpz_t key){
 
     mpz_set(_key,key);
     key_arr_=Key_Schedule(_key);
+    #pragma omp for
     for (int i=9;i>0;i--){
          mpz_xor(_xor,key_arr_[i],msg);
          L_Transformation_inverse(_lsx_,_xor);
@@ -890,6 +912,7 @@ Code testing will create unit test and remove this in future version.
 
 int main(){
 //printf("%lx",S_Transformation(0xffeeddccbbaa99881122334455667700)>>32);
+
 mpz_t test,msg,res,key,cipher,x,m;
 mpz_init(test);
 mpz_init(cipher);
@@ -897,19 +920,37 @@ mpz_init(res);
 mpz_init(key);
 mpz_init(x);
 mpz_init(m);
+ mpz_t * key_arr_=malloc(sizeof(mpz_t)*10);
+ for(int i=0;i<10;i++){
+        mpz_init(key_arr_[i]);
+    }
+
 
 //mpz_set_str(x,"10101",2);
 //mpz_set_str(m,"1100",2);
 mpz_init(msg);
 mpz_set_str(key,"8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef",16);
 mpz_set_str(msg,"1122334455667700ffeeddccbbaa9988",16);
+key_arr_=Key_Schedule(key);
 //Round_constant(res,5);
 gmp_printf("Original PlainText Message: %Zx\n", msg);
 gmp_printf("Symmetric Key : %Zx\n", key);
 //mpz_set_ui(res,10);
 //mpz_set_str(test,"f9eae5f29b2815e31f11ac5d9c29fb01",16);
-encrypt(cipher,msg,key);
-gmp_printf("Cipher Text: %Zx\n", cipher);
+struct timeval start,end;
+gettimeofday(&start,NULL);
+///#pragma omp parallel
+#pragma omp for
+for(int i=0;i<10000;i++){
+encrypt(cipher,msg,key,key_arr_);}
+
+//encrypt(cipher,msg,key,key_arr_);
+//encrypt(cipher,msg,key,key_arr_);
+//gmp_printf("Cipher Text: %Zx\n", cipher);
+gettimeofday(&end,NULL);
+long sec=(end.tv_sec-start.tv_sec);
+long us=(((sec*1000000)+end.tv_usec)-(start.tv_usec));
+printf("\nExecutionTime: %lf ms\n",(double)us/1000);
 decrypt(res,cipher,key);
 gmp_printf("Decrypted Text: %Zx\n", res);
 //R_Transformation_inverse(res,test);
@@ -933,4 +974,6 @@ mpz_clear(res);
 mpz_clear(key);
 mpz_clear(x);
 mpz_clear(m);
+
+
 }

@@ -1,0 +1,3 @@
+gcc Kuznechik_Fast.c -lgmp -fopenmp
+./a.out
+gprof ./a.out gmon.out > profile.txt
