@@ -1,22 +1,17 @@
 <h1>
-  Contributing Guidelines
+  Contributing Guidelines 
 </h1>
 
 <ol type="i">
   <ul>
-    <li>Any Programming Language implementation is accepted and submit a PR to merge branches</li>
+    <li>Any bug fix  is accepted and submit a valid PR to merge branches Note that Your Implementation / Adaptation Must follow NIST/GOST guidelines.</li>
   </ul>
-
-  
-  <li> 
-
+  <ul>
+    Currently working on the ones marked as ❌ 
+  </ul>
+  <footer>
     
-  1.Any Algorithms Submitted Must include A shared library interface eg.Currently The C implementation of ZKP supports the same for future interoperablity with JS/Python
-
+  Pls Note that The Above Algorithms Implemented by me is Not the fastest or the most secure but definitely does the job . Using this in production is discouraged.
     
-2.Any Algorithms Submitted in Java Must have support for JNI 
-  
-  </li>
-  <li>Currently Designing a front end for the above algorithms is not considered</li>
-  
+</footer>
 </ol>
