@@ -11,5 +11,8 @@ public interface EllipticCurveOperations {
 	
 	ECPoint PointAddition(ECPoint point, ECPoint point2);
 	ECPoint PointDoubling(ECPoint p1);
+
+
+	ECPoint ScalarMul(ECPoint point, BigInteger k);
 	
 }

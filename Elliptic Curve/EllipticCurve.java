@@ -1,7 +1,6 @@
 package testss;
 
 import java.math.BigInteger;
- 
 
 class ECCurveEquation {
 	//y**2=x**3+ax+b
@@ -94,9 +93,16 @@ public class EllipticCurve implements EllipticCurveOperations{
 	}
 
 	@Override
-	public BigInteger ScalarMul() {
+	public ECPoint ScalarMul(ECPoint point,BigInteger k) {
 		// yet to implement !
-		return null;
+		ECPoint result=point;
+		for (int i=k.bitLength()-2;i>=0;i--) {
+			result=result.PointDoubling(result);
+			if(k.testBit(i)) {
+				result=result.PointAddition(result, point);
+			}
+		}
+		return result;
 	}
 
 	public BigInteger ModInverse(BigInteger a,BigInteger b) {
