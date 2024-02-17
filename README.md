@@ -27,6 +27,7 @@ Ciphers   |<a href="https://github.com/AjayBadrinath/Cryptography/blob/main/Ciph
 PRNG |<a href ="https://github.com/AjayBadrinath/Cryptography/tree/main/PRNG/Mersenne%20Twister"> MT19937 </a>| ✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="25" height="25" >
 &nbsp;|<a href="https://github.com/AjayBadrinath/Cryptography/tree/main/PRNG/BBS">BlumBlumShub</a>|✔|<img src="https://upload.wikimedia.org/wikipedia/commons/1/18/C_Programming_Language.svg" width="20" height="20">
 ZKP|<a href="https://github.com/AjayBadrinath/Cryptography/tree/main/ZKP">Fiat-ShamirProtocol</a>|✔|<img src="https://upload.wikimedia.org/wikipedia/commons/1/18/C_Programming_Language.svg" width="20" height="20">
+ECC|<a href="https://github.com/AjayBadrinath/Cryptography/tree/main/Elliptic%20Curve">Elliptic Curve Cryptography</a>|✔|<img src="https://cdn.iconscout.com/icon/free/png-512/free-java-60-1174953.png?f=webp&w=256" width="20" height="20" >
 # Dependencies:
 	CJSON REFERENCE: https://github.com/DaveGamble/cJSON
 	
