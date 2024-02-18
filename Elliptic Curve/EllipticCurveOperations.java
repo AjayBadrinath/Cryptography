@@ -1,11 +1,10 @@
-package testss;
+package ecc;
 
 import java.math.BigInteger;
 
 public interface EllipticCurveOperations {
 	 
-	public BigInteger ScalarMul();
-	
+	 
 	
 	BigInteger ModInverse(BigInteger a, BigInteger b);
 	

@@ -1,11 +1,34 @@
-package testss;
+package ecc;
+/*
+ * 												Elliptic Curves Implementation 
+ * @author : Ajay Badrinath
+ * @Date   : 17/02/2024
+ * 
+ * 
+ * */
+
 
 import java.math.BigInteger;
 
+
+/*
+ * This class is currently empty and is a placeholder for supporting Strong Curves such as Curve 448/Curve 25519
+ * 
+ * Currently Supported Curve : Weistrass Curve 
+ * */
+/*
 class ECCurveEquation {
 	//y**2=x**3+ax+b
 	
 }
+*/
+
+/**
+ *
+ * Elliptic Curve Field .
+ *
+ */
+
  class ECField implements AlgebraicStructures{
 	private BigInteger p;
 	ECField(BigInteger p){
@@ -34,7 +57,7 @@ class ECCurveEquation {
 
 }
  
-class ECPoint implements EllipticCurveOperations {
+class ECPoint   {
 	BigInteger x;
 	BigInteger y;
 	public ECPoint(BigInteger x,BigInteger y){
@@ -44,7 +67,7 @@ class ECPoint implements EllipticCurveOperations {
 	}
 	
 }
- 
+
 public class EllipticCurve implements EllipticCurveOperations{
 	private BigInteger a,b;
 	private ECField prime;
@@ -67,7 +90,7 @@ public class EllipticCurve implements EllipticCurveOperations{
 			if (point.equals(point2)) {
 				//Breaking my unreadable code into legible parts.......
 				//lambda=((point.x.pow(2)).multiply(BigInteger.valueOf(3))).add(a).multiply(this.ModInverse(point.y.multiply(BigInteger.valueOf(2)), prime.GetField()));
-				Numerator=((point.x.pow(2)).multiply(BigInteger.valueOf(3))).add(a);
+				Numerator=(point.x.pow(2)).multiply(BigInteger.valueOf(3)).add(a);
 				Denominator=(point.y.multiply(BigInteger.valueOf(2)));
 				lambda=Numerator.multiply(this.ModInverse(Denominator, prime.GetField())).mod(prime.GetField());
 				
@@ -78,8 +101,8 @@ public class EllipticCurve implements EllipticCurveOperations{
 				lambda=Numerator.multiply(this.ModInverse(Denominator, prime.GetField())).mod(prime.GetField());
 			}
 			
-			X=lambda.pow(2).subtract(point.x.subtract(point2.x)).mod(prime.GetField());
-			Y=(lambda.multiply((point.x.subtract(X))).subtract(point.y)).mod((prime.GetField()));
+			X=(lambda.pow(2).subtract(point.x).subtract(point2.x)).mod(prime.GetField());
+			Y=lambda.multiply(point.x.subtract(X)).subtract(point.y).mod((prime.GetField()));
 			ECPoint point_new=new ECPoint(X,Y);
 			return point_new;
 			
@@ -97,10 +120,12 @@ public class EllipticCurve implements EllipticCurveOperations{
 		// yet to implement !
 		ECPoint result=point;
 		for (int i=k.bitLength()-2;i>=0;i--) {
-			result=result.PointDoubling(result);
+			result=(PointDoubling(result));
+			
 			if(k.testBit(i)) {
-				result=result.PointAddition(result, point);
+				result=PointAddition(point, result);
 			}
+			//System.out.println("Sub Routine:"+result.x+","+result.y);
 		}
 		return result;
 	}
@@ -131,5 +156,7 @@ public class EllipticCurve implements EllipticCurveOperations{
 		
 		return _s1;
 	}
+	
 
 }
+
