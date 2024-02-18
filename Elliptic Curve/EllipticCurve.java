@@ -3,7 +3,12 @@ package ecc;
  * 												Elliptic Curves Implementation 
  * @author : Ajay Badrinath
  * @Date   : 17/02/2024
- * 
+ * 							Version Changelog:
+ * 										0.0.1 - 
+ * 												1.Fixed Swap Errors While Computing PointDoubling
+ * 												2.Yet to Implement Infinity Points and point Negation
+ * 												3.Yet to document code.										
+ * 		
  * 
  * */
 
@@ -31,6 +36,7 @@ class ECCurveEquation {
 
  class ECField implements AlgebraicStructures{
 	private BigInteger p;
+	// Check for Prime Not Negative as we deal with only Prime Fields.
 	ECField(BigInteger p){
 		if (p.signum()<1) {
 			throw new  IllegalArgumentException("Prime Field P Should be Positive. ");
@@ -46,7 +52,7 @@ class ECCurveEquation {
 		
 	}
 	/**
-	 * For Low level Implementations .... Bit Ratios 
+	 * For Low level Implementations .... Bit Ratios . Not of Much Relevance but has to be considered for performance Issues.....
 	 * @return 
 	 *
 	 */
@@ -57,6 +63,13 @@ class ECCurveEquation {
 
 }
  
+ /**
+  * 
+  * ECPoint Class :
+  * 		 This Class is a Member Class that Encapsulates 2-D Elliptic Curve points (x,y) . Helps to Perform Group Operations on Points.
+  * 
+  *
+  */
 class ECPoint   {
 	BigInteger x;
 	BigInteger y;
@@ -68,6 +81,19 @@ class ECPoint   {
 	
 }
 
+/*
+ * Main Class Implementing EllipticCurveOperations Interface .
+ * 
+ *  Here I am Implementing only the Weistrass Curve of form y^2=x^3 + ax+b mod p (where a,b are curve parameters) and p belong to Prime Field Defined 
+ *  
+ *  Default Constructor Checks for NonSingular Curves Condition 
+ * 	EC Group Operations:
+ * 				1.Point Addition 
+ * 				2.Point Doubling
+ * 				3.Scalar Multiplication
+ * 				4.Point Negation
+ * 
+ * */
 public class EllipticCurve implements EllipticCurveOperations{
 	private BigInteger a,b;
 	private ECField prime;
@@ -85,6 +111,10 @@ public class EllipticCurve implements EllipticCurveOperations{
 	
 	
 	@Override
+	/*
+	 * Function That Define Point Addition Group Operation 
+	 * 
+	 * */
 	public ECPoint PointAddition(ECPoint point,ECPoint point2) {
 			BigInteger lambda,Numerator,Denominator,X,Y;
 			if (point.equals(point2)) {
@@ -110,14 +140,24 @@ public class EllipticCurve implements EllipticCurveOperations{
 	}
 
 	@Override
+	
+	/*
+	 * Function That Define Point Doubling Group Operation (Only Slope Changes)
+	 * 
+	 * */
 	public ECPoint PointDoubling(ECPoint p1) {
 		
 		return this.PointAddition(p1, p1);
 	}
 
 	@Override
+	/*
+	 * Function That Define Scalar Multiplication Group Operation 
+	 * Done Using Fast Double and Add method .Singular Loop 
+	 * 
+	 * */
 	public ECPoint ScalarMul(ECPoint point,BigInteger k) {
-		// yet to implement !
+
 		ECPoint result=point;
 		for (int i=k.bitLength()-2;i>=0;i--) {
 			result=(PointDoubling(result));
@@ -130,6 +170,10 @@ public class EllipticCurve implements EllipticCurveOperations{
 		return result;
 	}
 
+	/*
+	 * Function to Find Modular Inverse Within a Field Fp Using Extended Euclidean Algorithm.
+	 * 
+	 * */
 	public BigInteger ModInverse(BigInteger a,BigInteger b) {
 		// Finding Modular Inverse using Extended Euclidean Algorithm  ik there exists a BigInteger function that finds mod inv .. but whats the fun in that?
 		BigInteger _q=BigInteger.ZERO;
