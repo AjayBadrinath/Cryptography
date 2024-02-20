@@ -4,14 +4,14 @@ package ecc;
  * @author : Ajay Badrinath
  * @Date   : 17/02/2024
  * 							Version Changelog:
- * 										0.0.1 - 
+ * 										1.0.2 - 
  * 												1.Fixed Swap Errors While Computing PointDoubling
- * 												2.Yet to Implement Infinity Points and point Negation
- * 												3.Yet to document code.										
+ * 												2.Yet to Implement Infinity Points 
+ * 												3.Fixed Modular inverse Function 
+ 												4.Added Point Negation								
  * 		
  * 
  * */
-
 
 import java.math.BigInteger;
 
@@ -105,12 +105,15 @@ class ECPoint   {
 public class EllipticCurve implements EllipticCurveOperations{
 	private BigInteger a,b;
 	private ECField prime;
+	public ECPoint INFINITY;
 	
 	public EllipticCurve(BigInteger a,BigInteger b, ECField prime) {
 		if(!(a.pow(3).multiply(BigInteger.valueOf(4))).add(b.pow(2).multiply(BigInteger.valueOf(27))).equals(BigInteger.ZERO)) {
 		this.a=a;
 		this.b=b;
-		this.prime=prime;		}
+		this.prime=prime;	
+		INFINITY=new ECPoint(BigInteger.ZERO,BigInteger.ZERO);
+		}
 		else {
 			System.out.println("Curve Defined must be strictly Non Singular : -> Change Curve Parameters...");
 			return;
@@ -147,31 +150,15 @@ public class EllipticCurve implements EllipticCurveOperations{
 			
 		
 	}
-	public ECPoint PointAddition_sans_builtin(ECPoint point,ECPoint point2) {
-		BigInteger lambda,Numerator,Denominator,X,Y;
-		if (point.equals(point2)) {
-			//Breaking my unreadable code into legible parts.......
-			//lambda=((point.x.pow(2)).multiply(BigInteger.valueOf(3))).add(a).multiply(this.ModInverse(point.y.multiply(BigInteger.valueOf(2)), prime.GetField()));
-			Numerator=(point.x.pow(2)).multiply(BigInteger.valueOf(3)).add(a).mod(prime.GetField());
-			Denominator=(point.y.multiply(BigInteger.valueOf(2)));
-			lambda=Numerator.multiply(Denominator.modInverse(prime.GetField())).mod(prime.GetField());
-			
-		}else {
-			//lambda=(point2.y.subtract(point.y)).divide((point2.x.subtract(point.x)));
-			Numerator=((point2.y.subtract(point.y))).mod(prime.GetField());
-			Denominator=((point2.x.subtract(point.x)));
-			lambda=Numerator.multiply(Denominator.modInverse(prime.GetField())).mod(prime.GetField());
-		}
+	/*
+	 * Function to compute Point Reflection On Elliptic Curve.
+	 * */
+	public ECPoint PointInverse(ECPoint p) {
+		p.y=p.y.multiply(BigInteger.valueOf(-1)).add(prime.GetField());
+		return p;
 		
-		X=(lambda.pow(2).subtract(point.x).subtract(point2.x)).mod(prime.GetField());
-		Y=(lambda.multiply(point.x.subtract(X)).subtract(point.y)).mod(prime.GetField());
-		ECPoint point_new=new ECPoint(X,Y);
-
-		return point_new;
-		
+	}
 	
-}
-
 	@Override
 	
 	/*
@@ -193,32 +180,17 @@ public class EllipticCurve implements EllipticCurveOperations{
 
 		ECPoint result=point;
 		
-		/*
-		for (int i=k.bitLength()-1;i>=0;i--) {
-			
-			result=PointDoubling(result);
-			//System.out.println(k.testBit(i));
-			if(k.testBit(i)) {
-				//result=(PointDoubling(result));
-				result=PointAddition(point,result);
-				//System.out.println("Sub Routine:"+result.x+","+result.y);
-			}
-			
-			//System.out.println("Sub Routine:"+result.x+","+result.y);
-			
-		}
-		*/
+		
 		for (int i=k.bitLength()-2;i>=0;i--){
-			//System.out.println("i:"+i+" "+k.testBit(i));
+			
 			//System.out.println("Point Doubling");
 			result=PointDoubling(result);
-			//System.out.println(" X: "+result.x+" Y:"+result.y);
-			//System.out.println(" X_p:"+point.x+" Y_p:"+point.y);
+			
 			if(k.testBit(i)) {
 				//System.out.println("Point Addition");
 				
 				result=PointAddition(point,result);
-				//System.out.println(" X:"+result.x+" Y:"+result.y);
+
 			}
 			
 		}
@@ -242,10 +214,13 @@ public class EllipticCurve implements EllipticCurveOperations{
 	}
 	/*
 	 * Function to Find Modular Inverse Within a Field Fp Using Extended Euclidean Algorithm.
-	 * 
+	 *  Changes:
+	 *  	1. Extended Support for -ve Numerator and Error check for bounds on Denominator sign.
+	 *  	2. Fixed Stray negation Error that causes inconsistency while computing points on curve (Especially Odd Point 2*kP+P)
+	 *  	3. Consistent
 	 * */
 	public BigInteger ModInverse(BigInteger a,BigInteger b) {
-		// Self note Fix Mod Inverse for -ve Denominator.
+
 		// Finding Modular Inverse using Extended Euclidean Algorithm  ik there exists a BigInteger function that finds mod inv .. but whats the fun in that?
 		if ((b.compareTo(BigInteger.ZERO)==0) || (b.compareTo(BigInteger.ZERO)==-1)) {
 			System.out.println("Moduland Must not be zero");
@@ -260,7 +235,7 @@ public class EllipticCurve implements EllipticCurveOperations{
 		BigInteger _s=BigInteger.ZERO;
 		BigInteger[] q_r=new BigInteger[2];
 	
-		//System.out.println(_q+"\t"+A+"\t"+B+"\t"+_rem+"\t"+_s1+"\t"+_s2+"\t"+_s);
+		
 		
 		while (!B.equals(BigInteger.ZERO)) {
 			
@@ -272,7 +247,7 @@ public class EllipticCurve implements EllipticCurveOperations{
 			B=_rem;
 			_s1=_s2;
 			_s2=_s;
-			//System.out.println(_q+"\t"+A+"\t"+B+"\t"+_rem+"\t"+_s1+"\t"+_s2+"\t"+_s);	
+			
 		}
 		if((a.compareTo(b)==-1 && a.signum()==-1)) {
 			return b.subtract(_s1);
@@ -280,7 +255,7 @@ public class EllipticCurve implements EllipticCurveOperations{
 		if (_s1.signum()==-1 ) {
 			return _s1.add(b);
 		}else {
-		//(a.compareTo(b)==-1 && a.signum()==-1);
+		
 		
 		return _s1;
 		}
