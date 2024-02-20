@@ -47,6 +47,14 @@ class ECCurveEquation {
 		return p;
 		
 	}
+	/*
+	 * By Hasse's Theorem The Number of points on the curve is Relative to the Prime Field Strength.
+	 * */
+	public BigInteger getSizeOfField() {
+		BigInteger ul=p.add(BigInteger.ONE).subtract(BigInteger.TWO.multiply(p.sqrt()));
+		BigInteger ll=p.add(BigInteger.ONE).add(BigInteger.TWO.multiply(p.sqrt()));
+		return ul.subtract(ll).abs();
+	}
 	public  int getFieldSize() {
 		return p.bitLength();
 		
@@ -120,24 +128,49 @@ public class EllipticCurve implements EllipticCurveOperations{
 			if (point.equals(point2)) {
 				//Breaking my unreadable code into legible parts.......
 				//lambda=((point.x.pow(2)).multiply(BigInteger.valueOf(3))).add(a).multiply(this.ModInverse(point.y.multiply(BigInteger.valueOf(2)), prime.GetField()));
-				Numerator=(point.x.pow(2)).multiply(BigInteger.valueOf(3)).add(a);
+				Numerator=(point.x.pow(2)).multiply(BigInteger.valueOf(3)).add(a).mod(prime.GetField());
 				Denominator=(point.y.multiply(BigInteger.valueOf(2)));
-				lambda=Numerator.multiply(this.ModInverse(Denominator, prime.GetField())).mod(prime.GetField());
+				lambda=Numerator.multiply(ModInverse(Denominator, prime.GetField())).mod(prime.GetField());
 				
 			}else {
 				//lambda=(point2.y.subtract(point.y)).divide((point2.x.subtract(point.x)));
-				Numerator=((point2.y.subtract(point.y)));
+				Numerator=((point2.y.subtract(point.y))).mod(prime.GetField());
 				Denominator=((point2.x.subtract(point.x)));
-				lambda=Numerator.multiply(this.ModInverse(Denominator, prime.GetField())).mod(prime.GetField());
+				lambda=Numerator.multiply(ModInverse(Denominator, prime.GetField())).mod(prime.GetField());
 			}
 			
 			X=(lambda.pow(2).subtract(point.x).subtract(point2.x)).mod(prime.GetField());
-			Y=lambda.multiply(point.x.subtract(X)).subtract(point.y).mod((prime.GetField()));
+			Y=(lambda.multiply(point.x.subtract(X)).subtract(point.y)).mod(prime.GetField());
 			ECPoint point_new=new ECPoint(X,Y);
+	
 			return point_new;
 			
 		
 	}
+	public ECPoint PointAddition_sans_builtin(ECPoint point,ECPoint point2) {
+		BigInteger lambda,Numerator,Denominator,X,Y;
+		if (point.equals(point2)) {
+			//Breaking my unreadable code into legible parts.......
+			//lambda=((point.x.pow(2)).multiply(BigInteger.valueOf(3))).add(a).multiply(this.ModInverse(point.y.multiply(BigInteger.valueOf(2)), prime.GetField()));
+			Numerator=(point.x.pow(2)).multiply(BigInteger.valueOf(3)).add(a).mod(prime.GetField());
+			Denominator=(point.y.multiply(BigInteger.valueOf(2)));
+			lambda=Numerator.multiply(Denominator.modInverse(prime.GetField())).mod(prime.GetField());
+			
+		}else {
+			//lambda=(point2.y.subtract(point.y)).divide((point2.x.subtract(point.x)));
+			Numerator=((point2.y.subtract(point.y))).mod(prime.GetField());
+			Denominator=((point2.x.subtract(point.x)));
+			lambda=Numerator.multiply(Denominator.modInverse(prime.GetField())).mod(prime.GetField());
+		}
+		
+		X=(lambda.pow(2).subtract(point.x).subtract(point2.x)).mod(prime.GetField());
+		Y=(lambda.multiply(point.x.subtract(X)).subtract(point.y)).mod(prime.GetField());
+		ECPoint point_new=new ECPoint(X,Y);
+
+		return point_new;
+		
+	
+}
 
 	@Override
 	
@@ -159,23 +192,65 @@ public class EllipticCurve implements EllipticCurveOperations{
 	public ECPoint ScalarMul(ECPoint point,BigInteger k) {
 
 		ECPoint result=point;
-		for (int i=k.bitLength()-2;i>=0;i--) {
-			result=(PointDoubling(result));
+		
+		/*
+		for (int i=k.bitLength()-1;i>=0;i--) {
 			
+			result=PointDoubling(result);
+			//System.out.println(k.testBit(i));
 			if(k.testBit(i)) {
-				result=PointAddition(point, result);
+				//result=(PointDoubling(result));
+				result=PointAddition(point,result);
+				//System.out.println("Sub Routine:"+result.x+","+result.y);
 			}
+			
 			//System.out.println("Sub Routine:"+result.x+","+result.y);
+			
+		}
+		*/
+		for (int i=k.bitLength()-2;i>=0;i--){
+			//System.out.println("i:"+i+" "+k.testBit(i));
+			//System.out.println("Point Doubling");
+			result=PointDoubling(result);
+			//System.out.println(" X: "+result.x+" Y:"+result.y);
+			//System.out.println(" X_p:"+point.x+" Y_p:"+point.y);
+			if(k.testBit(i)) {
+				//System.out.println("Point Addition");
+				
+				result=PointAddition(point,result);
+				//System.out.println(" X:"+result.x+" Y:"+result.y);
+			}
+			
 		}
 		return result;
 	}
-
+	public ECPoint ScalarMulRec(ECPoint point,BigInteger k) {
+		if (k.equals(BigInteger.ZERO)) {
+			return null;
+		}
+		else if(k.equals(BigInteger.ONE)) {
+			return point;
+		}
+		else {
+			ECPoint result = ScalarMulRec(PointDoubling(point), k.divide(BigInteger.TWO));
+		
+        if (k.mod(BigInteger.valueOf(2)).equals(BigInteger.ONE)) {
+            result = PointAddition(result, point);
+        }
+        return result;
+		}
+	}
 	/*
 	 * Function to Find Modular Inverse Within a Field Fp Using Extended Euclidean Algorithm.
 	 * 
 	 * */
 	public BigInteger ModInverse(BigInteger a,BigInteger b) {
+		// Self note Fix Mod Inverse for -ve Denominator.
 		// Finding Modular Inverse using Extended Euclidean Algorithm  ik there exists a BigInteger function that finds mod inv .. but whats the fun in that?
+		if ((b.compareTo(BigInteger.ZERO)==0) || (b.compareTo(BigInteger.ZERO)==-1)) {
+			System.out.println("Moduland Must not be zero");
+			return null;
+		}
 		BigInteger _q=BigInteger.ZERO;
 		BigInteger _rem=BigInteger.ZERO;
 		BigInteger A= a;
@@ -184,8 +259,11 @@ public class EllipticCurve implements EllipticCurveOperations{
 		BigInteger _s2=BigInteger.ZERO;
 		BigInteger _s=BigInteger.ZERO;
 		BigInteger[] q_r=new BigInteger[2];
+	
+		//System.out.println(_q+"\t"+A+"\t"+B+"\t"+_rem+"\t"+_s1+"\t"+_s2+"\t"+_s);
 		
 		while (!B.equals(BigInteger.ZERO)) {
+			
 			q_r=A.divideAndRemainder(B);
 			_q=q_r[0];
 			_rem=q_r[1];
@@ -194,11 +272,18 @@ public class EllipticCurve implements EllipticCurveOperations{
 			B=_rem;
 			_s1=_s2;
 			_s2=_s;
-			
-			
+			//System.out.println(_q+"\t"+A+"\t"+B+"\t"+_rem+"\t"+_s1+"\t"+_s2+"\t"+_s);	
 		}
+		if((a.compareTo(b)==-1 && a.signum()==-1)) {
+			return b.subtract(_s1);
+		}
+		if (_s1.signum()==-1 ) {
+			return _s1.add(b);
+		}else {
+		//(a.compareTo(b)==-1 && a.signum()==-1);
 		
 		return _s1;
+		}
 	}
 	
 
