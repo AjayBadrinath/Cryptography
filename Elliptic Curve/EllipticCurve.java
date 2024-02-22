@@ -4,14 +4,22 @@ package ecc;
  * @author : Ajay Badrinath
  * @Date   : 17/02/2024
  * 							Version Changelog:
- * 										1.0.2 - 
+ * 								
+ * 										1.0.3 - 
  * 												1.Fixed Swap Errors While Computing PointDoubling
- * 												2.Yet to Implement Infinity Points 
+ * 												2.Added Support for Point at inf ( does have side-effects!!!)
  * 												3.Fixed Modular inverse Function 
- 												4.Added Point Negation								
+ 												4.Added Point Negation	
+ 												5.Remove Brute Force Aproach on Additive Inverse with a clean implementation.
+ 												
+ 								
+ 							To Fix: 
+ 												1.Point One After Infinty behaves differently but does not fail. Otherwise Passed all test.	
+ 															
  * 		
  * 
  * */
+
 
 import java.math.BigInteger;
 
@@ -20,6 +28,9 @@ import java.math.BigInteger;
  * This class is currently empty and is a placeholder for supporting Strong Curves such as Curve 448/Curve 25519
  * 
  * Currently Supported Curve : Weistrass Curve 
+					
+ * 		
+ * 
  * */
 /*
 class ECCurveEquation {
@@ -30,7 +41,8 @@ class ECCurveEquation {
 
 /**
  *
- * Elliptic Curve Field .
+ *    Defining   Elliptic Curve Field over Some Prime 
+ *    
  *
  */
 
@@ -145,13 +157,19 @@ public class EllipticCurve implements EllipticCurveOperations{
 			X=(lambda.pow(2).subtract(point.x).subtract(point2.x)).mod(prime.GetField());
 			Y=(lambda.multiply(point.x.subtract(X)).subtract(point.y)).mod(prime.GetField());
 			ECPoint point_new=new ECPoint(X,Y);
-	
+			if((AdditiveModInverse(point2.y).equals(point.y))&&(point2.x.equals(point.x))) {
+				
+				return INFINITY;
+				
+				}
 			return point_new;
 			
 		
 	}
 	/*
 	 * Function to compute Point Reflection On Elliptic Curve.
+	 * 
+	 * 
 	 * */
 	public ECPoint PointInverse(ECPoint p) {
 		p.y=p.y.multiply(BigInteger.valueOf(-1)).add(prime.GetField());
@@ -166,7 +184,11 @@ public class EllipticCurve implements EllipticCurveOperations{
 	 * 
 	 * */
 	public ECPoint PointDoubling(ECPoint p1) {
-		
+		if(p1.equals(INFINITY)) {
+			
+			return INFINITY;
+			
+			}
 		return this.PointAddition(p1, p1);
 	}
 
@@ -183,13 +205,21 @@ public class EllipticCurve implements EllipticCurveOperations{
 		
 		for (int i=k.bitLength()-2;i>=0;i--){
 			
-			//System.out.println("Point Doubling");
+			
+			//System.out.println("Point Doubling "+result.x+" "+result.y);
+			
 			result=PointDoubling(result);
+			System.out.println("Point Doubling "+result.x+" "+result.y);
 			
 			if(k.testBit(i)) {
-				//System.out.println("Point Addition");
-				
+				if(result.equals(INFINITY)) {
+					//result=point;
+					
+				}
+				System.out.println("Point Addition"+result.x+" "+result.y);
 				result=PointAddition(point,result);
+				System.out.println("Point Addition"+result.x+" "+result.y);
+				//System.out.println("Param"+" "+point.x+" "+point.y);
 
 			}
 			
@@ -203,6 +233,7 @@ public class EllipticCurve implements EllipticCurveOperations{
 		else if(k.equals(BigInteger.ONE)) {
 			return point;
 		}
+		 
 		else {
 			ECPoint result = ScalarMulRec(PointDoubling(point), k.divide(BigInteger.TWO));
 		
@@ -261,6 +292,23 @@ public class EllipticCurve implements EllipticCurveOperations{
 		}
 	}
 	
+	/*
+	 * Revoke Bruteforce approach /../
+	 * 
+	 * */
+	public BigInteger AdditiveModInverse(BigInteger k) {
+		//Raw BruteForce 
+		/*
+		for (BigInteger i=BigInteger.ZERO;(i.compareTo(prime.GetField())==-1);i=i.add(BigInteger.ONE)) {
+			//System.out.println(i);
+			if((k.add(i)).mod(prime.GetField()).equals(BigInteger.ZERO)) {
+				
+				return i;
+			}
+		}*/
+		return k.negate().mod(prime.GetField());
+		
+	}
 
 }
 
