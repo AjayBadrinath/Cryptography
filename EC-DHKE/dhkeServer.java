@@ -1,20 +1,13 @@
 package ecc;
-
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
  class ModifiedTCPHeaderAuth{
 	ECPoint curveParam,generator,PublicKey;
 	ECField field;
@@ -45,77 +38,38 @@ public class dhkeServer {
 		ECPoint generator1=new ECPoint(BigInteger.valueOf(5),BigInteger.valueOf(1));
 		ECField field=new ECField(BigInteger.valueOf(17));
 		EllipticCurve curve=new EllipticCurve(BigInteger.valueOf(2),BigInteger.valueOf(2),field);
-		int op1;
 		Socket s1;
 		ServerSocket serv;
-		DataOutputStream r2;
-		OutputStream r1;
-		PrintStream p1;
 		try {
 			serv=new ServerSocket(8080);
 			
 			s1=serv.accept();
-			r2=new DataOutputStream(s1.getOutputStream());
-			r1=s1.getOutputStream();
-			int i=5;
+			int i=1;
 			OutputStream os = s1.getOutputStream();
-			List<Object> objects = new ArrayList<>();
+			InputStream is=s1.getInputStream();
 			ECPoint curveParam=new ECPoint(BigInteger.valueOf(2),BigInteger.valueOf(2));
-			//List <ObjectOutputStream>s;
-			//Random s=new Random();
-			//s.nextInt(10);
-			//r2.writeUTF(null);
-			//p1=new PrintStream(s1.getOutputStream());
-			/*
-			objects.add("Chosen Curve Parameter a-:"+2+"b-:"+2+"\n");
-			ECPoint curveParam=new ECPoint(BigInteger.valueOf(2),BigInteger.valueOf(2));
-			objects.add(curveParam);
-			objects.add("Chosen Curve Generator Point:("+5+","+1+")\n");
-			objects.add(generator1);
-			objects.add("Chosen Field:Z:"+17+"\n");
-			objects.add(field);
-			ECPoint p=curve.ScalarMul(generator1, BigInteger.valueOf(17));
-			objects.add(p);
-			*/
-			ECPoint p=curve.ScalarMul(generator1, BigInteger.valueOf(17));
+			BigInteger privKey= BigInteger.valueOf(7);
+			ECPoint p=curve.ScalarMul(generator1,privKey);
+			
 			ModifiedTCPHeaderAuth auth=new ModifiedTCPHeaderAuth(curveParam,generator1,field,p);
 			
-			while(true) {    
+			while(i!=0) {  
+				
 				List <Object> o=auth.getHeader();
 				ObjectOutputStream oos1 = new ObjectOutputStream(os);
 				oos1.writeObject(o);
 				
-				//r2.writeBytes();
-				/*
-				r2.writeUTF("Chosen Curve Parameter a-:"+2+"b-:"+2+"\n");
+				ObjectInputStream p3=new ObjectInputStream(is);
+				List<?>B=(List<?>) p3.readObject();
 				
-				
-				ECPoint curveParam=new ECPoint(BigInteger.valueOf(2),BigInteger.valueOf(2));
-				
-				oos1.writeObject(curveParam);
-				objects.add(curveParam);
-				
-				
-				r2.writeUTF("Chosen Curve Generator Point:("+5+","+1+")\n");
-				oos1.writeObject(generator1);
-				
-				
-				r2.writeUTF("Chosen Field:Z:"+17+"\n");
-				
-				oos1.writeObject(field);
-				
-				System.out.println("Chosen Private key:"+17);
-				///
-				
-				ECPoint p=curve.ScalarMul(generator1, BigInteger.valueOf(17));
-				
-				
-				oos1.writeObject(p);
+				ECPoint B_Pub=(ECPoint) B.get(0);
+				ECPoint shared_key=curve.ScalarMul(B_Pub,privKey);
+				System.out.println("Shared Key:"+shared_key.x+" "+shared_key.y);
 				
 				i--;
 				
-				*/
-				
+				oos1.close();
+				p3.close();
 			}
 		}catch(Exception e) {
 			e.printStackTrace();

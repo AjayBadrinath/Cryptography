@@ -5,12 +5,13 @@ package ecc;
  * @Date   : 17/02/2024
  * 							Version Changelog:
  * 								
- * 										1.0.3 - 
+ * 										1.0.4 - 
  * 												1.Fixed Swap Errors While Computing PointDoubling
  * 												2.Added Support for Point at inf ( does have side-effects!!!)
  * 												3.Fixed Modular inverse Function 
  												4.Added Point Negation	
  												5.Remove Brute Force Aproach on Additive Inverse with a clean implementation.
+ 												6.Added Serialization For ECField and ECPoint Classes .
  												
  								
  							To Fix: 
@@ -21,6 +22,7 @@ package ecc;
  * */
 
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 
@@ -46,10 +48,15 @@ class ECCurveEquation {
  *
  */
 
- class ECField implements AlgebraicStructures{
+ class ECField implements Serializable , AlgebraicStructures {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private BigInteger p;
 	// Check for Prime Not Negative as we deal with only Prime Fields.
 	ECField(BigInteger p){
+		
 		if (p.signum()<1) {
 			throw new  IllegalArgumentException("Prime Field P Should be Positive. ");
 		}
@@ -90,7 +97,11 @@ class ECCurveEquation {
   * 
   *
   */
-class ECPoint   {
+class ECPoint implements Serializable  {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2850362574454304355L;
 	BigInteger x;
 	BigInteger y;
 	public ECPoint(BigInteger x,BigInteger y){
